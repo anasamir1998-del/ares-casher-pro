@@ -10,6 +10,9 @@ const App = {
         // Restore theme
         this.loadTheme();
 
+        // Restore sidebar state
+        this.loadSidebarState();
+
         // Apply stored language to UI
         this.updateStaticUI();
 
@@ -59,6 +62,27 @@ const App = {
         if (Auth.getSession()) {
             this.navigate(this.currentScreen || 'dashboard');
         }
+    },
+
+    /* ── Sidebar Management ── */
+    loadSidebarState() {
+        const collapsed = localStorage.getItem('ares_sidebar_collapsed') === 'true';
+        if (collapsed) {
+            document.getElementById('sidebar')?.classList.add('collapsed');
+        }
+    },
+
+    toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const isMobile = window.innerWidth <= 768;
+
+        if (isMobile) {
+            document.body.classList.toggle('sidebar-open');
+        } else {
+            const isCollapsed = sidebar.classList.toggle('collapsed');
+            localStorage.setItem('ares_sidebar_collapsed', isCollapsed);
+        }
+        this.playSound('click');
     },
 
     showLanguageSelector() {
@@ -254,10 +278,11 @@ const App = {
     showKeyboardShortcuts() {
         const shortcuts = [
             { key: 'F1', action: t('pos') },
-            { key: 'F2', action: t('dashboard') },
+            { key: 'F2', action: t('toggle_sidebar') },
             { key: 'F3', action: t('products') },
             { key: 'F4', action: t('invoices') },
             { key: 'F5', action: t('reports') },
+            { key: 'F6', action: t('dashboard') },
             { key: 'F7', action: t('shifts') },
             { key: 'Esc', action: t('close') },
         ];
@@ -292,6 +317,11 @@ const App = {
             item.classList.toggle('active', item.dataset.screen === screen);
         });
 
+        // Close sidebar on mobile after navigation
+        if (window.innerWidth <= 768) {
+            document.body.classList.remove('sidebar-open');
+        }
+
         this.currentScreen = screen;
         const content = document.getElementById('content-body');
         const headerTitle = document.getElementById('header-title');
@@ -321,10 +351,11 @@ const App = {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
 
         if (e.key === 'F1') { e.preventDefault(); this.navigate('pos'); }
-        if (e.key === 'F2') { e.preventDefault(); this.navigate('dashboard'); }
+        if (e.key === 'F2') { e.preventDefault(); this.toggleSidebar(); }
         if (e.key === 'F3') { e.preventDefault(); this.navigate('products'); }
         if (e.key === 'F4') { e.preventDefault(); this.navigate('invoices'); }
         if (e.key === 'F5') { e.preventDefault(); this.navigate('reports'); }
+        if (e.key === 'F6') { e.preventDefault(); this.navigate('dashboard'); }
         if (e.key === 'F7') { e.preventDefault(); this.navigate('shifts'); }
         if (e.key === 'Escape') { Modal.hide(); }
     },

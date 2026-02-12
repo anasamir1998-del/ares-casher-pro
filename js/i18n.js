@@ -53,6 +53,7 @@ const I18n = {
         back: { ar: 'رجوع', en: 'Back', ur: 'واپس' },
         view: { ar: 'عرض', en: 'View', ur: 'دیکھیں' },
         new_sale: { ar: 'بيع جديد', en: 'New Sale', ur: 'نئی فروخت' },
+        toggle_sidebar: { ar: 'طي/فرد القائمة', en: 'Toggle Sidebar', ur: 'فہرست کو چھپائیں/دکھائیں' },
 
         // ── Toast & Status Messages ────────────────────
         success: { ar: 'تم', en: 'Done', ur: 'ہو گیا' },

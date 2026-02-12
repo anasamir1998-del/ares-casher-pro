@@ -230,10 +230,43 @@ h6 {
     border-left: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
-    transition: width var(--transition-slow), min-width var(--transition-slow);
+    transition: width var(--transition-slow), min-width var(--transition-slow), transform var(--transition-slow);
     position: relative;
     z-index: 100;
     backdrop-filter: blur(20px);
+}
+
+/* Collapsed Sidebar */
+.sidebar.collapsed {
+    width: var(--sidebar-collapsed);
+    min-width: var(--sidebar-collapsed);
+}
+
+.sidebar.collapsed .sidebar-brand span,
+.sidebar.collapsed .sidebar-brand h2,
+.sidebar.collapsed .nav-item span,
+.sidebar.collapsed .nav-section-title,
+.sidebar.collapsed .user-details {
+    display: none;
+}
+
+.sidebar.collapsed .sidebar-header {
+    justify-content: center;
+    padding: 24px 0;
+}
+
+.sidebar.collapsed .nav-item {
+    justify-content: center;
+    padding: 12px;
+}
+
+.sidebar.collapsed .nav-item i {
+    margin: 0;
+}
+
+.sidebar.collapsed .user-info {
+    justify-content: center;
+    padding: 8px;
 }
 
 .sidebar-header {
@@ -1958,6 +1991,161 @@ textarea.form-control {
     background: var(--danger);
     border: 2px solid var(--bg-primary);
     animation: pulse 2s infinite;
+}
+
+/* ── Mobile Responsive ── */
+@media screen and (max-width: 768px) {
+    :root {
+        --sidebar-width: 240px;
+    }
+
+    #app {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        position: fixed;
+        top: 0;
+        right: calc(var(--sidebar-width) * -1);
+        height: 100vh;
+        width: var(--sidebar-width);
+        min-width: var(--sidebar-width);
+        z-index: 1000;
+        transition: right var(--transition-slow);
+        border-left: none;
+        border-right: 1px solid var(--border-color);
+        direction: rtl;
+        /* Ensure sidebar is always RTL for icons if main is RTL */
+    }
+
+    body.sidebar-open .sidebar {
+        right: 0;
+    }
+
+    /* Overlay */
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        z-index: 999;
+    }
+
+    body.sidebar-open .sidebar-overlay {
+        display: block;
+    }
+
+    .main-content {
+        width: 100%;
+    }
+
+    .content-header {
+        padding: 0 16px;
+    }
+
+    .content-body {
+        padding: 16px;
+    }
+
+    /* POS Mobile Adjustments */
+    .pos-container {
+        flex-direction: column !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+
+    .pos-products {
+        height: auto !important;
+        min-height: 400px;
+    }
+
+    .pos-cart {
+        width: 100% !important;
+        height: auto !important;
+        border-right: none !important;
+        border-top: 1px solid var(--border-color);
+        position: sticky;
+        bottom: 0;
+        background: var(--bg-sidebar);
+    }
+
+    .cart-items {
+        max-height: 300px;
+    }
+
+    .stat-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .login-card {
+        width: 90%;
+        padding: 32px 20px;
+    }
+
+    /* Hide text on some buttons in header for space */
+    .header-actions .btn span {
+        display: none;
+    }
+
+    .header-actions {
+        gap: 8px;
+    }
+}
+
+/* ── Menu Toggle Button (Hamburger) ── */
+.menu-toggle {
+    display: none;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+    background: var(--bg-glass);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+@media screen and (max-width: 768px) {
+    .menu-toggle {
+        display: flex;
+    }
+}
+
+/* Desktop Sidebar Toggle Pin */
+.sidebar-toggle-pin {
+    position: absolute;
+    left: -12px;
+    top: 72px;
+    width: 24px;
+    height: 24px;
+    background: var(--accent-gradient);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 10px;
+    cursor: pointer;
+    z-index: 101;
+    border: 2px solid var(--bg-primary);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-fast);
+}
+
+.sidebar.collapsed .sidebar-toggle-pin i {
+    transform: rotate(180deg);
+}
+
+@media screen and (max-width: 768px) {
+    .sidebar-toggle-pin {
+        display: none;
+    }
 }
 
 /* ── Print Styles ── */
