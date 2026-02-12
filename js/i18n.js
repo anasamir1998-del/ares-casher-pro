@@ -30,6 +30,11 @@ const I18n = {
         // ── Login ──────────────────────────────────────
         login_title: { ar: 'تسجيل الدخول', en: 'Login', ur: 'لاگ ان' },
         login_subtitle: { ar: 'نظام نقاط البيع الاحترافي', en: 'Professional Point of Sale System', ur: 'پروفیشنل پوائنٹ آف سیل سسٹم' },
+        login_hint: {
+            ar: 'الدعم الفني: سمير محمد | 202 400 560 966+',
+            en: 'Support: Samir Mohamed | +966 560 400 202',
+            ur: 'سپورٹ: سمیر محمد | +966 560 400 202'
+        },
         username: { ar: 'اسم المستخدم', en: 'Username', ur: 'صارف نام' },
         password: { ar: 'كلمة المرور', en: 'Password', ur: 'پاسورڈ' },
         login_btn: { ar: 'دخول', en: 'Login', ur: 'لاگ ان' },
