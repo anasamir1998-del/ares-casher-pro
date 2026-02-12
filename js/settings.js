@@ -22,6 +22,25 @@ const Settings = {
         `;
     },
 
+    applyShopName() {
+        const name = db.getSetting('company_name', 'ARES');
+        const nameEn = db.getSetting('company_name_en', 'Casher Pro');
+
+        // Update document title
+        document.title = `${name} — ${nameEn}`;
+
+        // Update UI elements
+        const loginBrand = document.getElementById('brand-name-login');
+        const sidebarBrand = document.getElementById('brand-name-sidebar');
+        const sidebarSubtitle = document.getElementById('brand-subtitle-sidebar');
+        const topbarBrand = document.getElementById('brand-name-topbar');
+
+        if (loginBrand) loginBrand.textContent = name + ' ' + nameEn;
+        if (sidebarBrand) sidebarBrand.textContent = name;
+        if (sidebarSubtitle) sidebarSubtitle.textContent = nameEn;
+        if (topbarBrand) topbarBrand.textContent = name;
+    },
+
     switchTab(btn, tab) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
@@ -124,6 +143,8 @@ const Settings = {
         Toast.show(t('success'), t('company_saved'), 'success');
         // Refresh preview
         document.getElementById('settings-content').innerHTML = this.renderCompanySettings();
+        // Apply changes immediately
+        this.applyShopName();
     },
 
     renderTaxSettings() {

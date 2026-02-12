@@ -16,6 +16,11 @@ const App = {
         // Restore nav mode (sidebar or topbar)
         this.loadNavMode();
 
+        // Apply shop name/branding
+        if (window.Settings && Settings.applyShopName) {
+            Settings.applyShopName();
+        }
+
         // Apply stored language to UI
         this.updateStaticUI();
 
