@@ -2049,7 +2049,7 @@ textarea.form-control {
         transform: translateX(0);
     }
 
-    /* Overlay */
+    /* Overlay — completely transparent, just a click-catcher */
     .sidebar-overlay {
         display: none;
         position: fixed;
@@ -2057,11 +2057,10 @@ textarea.form-control {
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(0, 0, 0, 0.85) !important;
-        /* Darker and more solid */
+        background: transparent !important;
         backdrop-filter: none !important;
-        /* Remove blur from overlay too if it's annoying */
         -webkit-backdrop-filter: none !important;
+        filter: none !important;
         z-index: 10000 !important;
     }
 
