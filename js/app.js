@@ -70,19 +70,30 @@ const App = {
         if (collapsed) {
             document.getElementById('sidebar')?.classList.add('collapsed');
         }
+
+        // Attach overlay click handler
+        const overlay = document.getElementById('sidebar-overlay');
+        if (overlay) {
+            overlay.addEventListener('click', () => this.closeSidebar());
+            overlay.addEventListener('touchend', (e) => { e.preventDefault(); this.closeSidebar(); });
+        }
     },
 
     toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
         const isMobile = window.innerWidth <= 768;
 
         if (isMobile) {
             document.body.classList.toggle('sidebar-open');
         } else {
+            const sidebar = document.getElementById('sidebar');
             const isCollapsed = sidebar.classList.toggle('collapsed');
             localStorage.setItem('ares_sidebar_collapsed', isCollapsed);
         }
         this.playSound('click');
+    },
+
+    closeSidebar() {
+        document.body.classList.remove('sidebar-open');
     },
 
     showLanguageSelector() {

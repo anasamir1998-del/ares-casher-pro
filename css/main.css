@@ -1994,101 +1994,96 @@ textarea.form-control {
     animation: pulse 2s infinite;
 }
 
-/* ── Mobile Responsive ── */
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE RESPONSIVE  (max-width: 768px)
+   ═══════════════════════════════════════════════════════════════ */
 @media screen and (max-width: 768px) {
-    :root {
-        --sidebar-width: 240px;
+
+    /* ── Reset all blur/glass effects on mobile ── */
+    .sidebar,
+    .content-header,
+    .glass-card,
+    .modal,
+    .toast,
+    .sidebar-overlay {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
     }
 
+    /* ── Layout ── */
     #app {
         flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+        overflow-y: auto;
     }
 
-    /* Aggressively disable ALL blurs when sidebar is open on mobile */
-    body.sidebar-open * {
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
-        filter: none !important;
-    }
-
+    /* ── Sidebar Drawer ── */
     .sidebar {
         position: fixed;
         top: 0;
         bottom: 0;
-        width: var(--sidebar-width);
-        min-width: var(--sidebar-width);
+        width: 260px;
+        min-width: 260px;
         height: 100vh;
-        z-index: 10001 !important;
-        /* Extremely high priority */
-        background-color: #0d112b !important;
-        /* Very solid dark color */
-        background: #0d112b !important;
-        backdrop-filter: none !important;
-        /* Completely remove any blurring */
-        -webkit-backdrop-filter: none !important;
-        opacity: 1 !important;
-        /* Ensure no transparency */
-        transition: transform var(--transition-slow);
-        box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5) !important;
+        z-index: 1002;
+        background: var(--bg-primary);
+        border: none;
+        box-shadow: -4px 0 20px rgba(0, 0, 0, 0.4);
+        transition: transform 0.3s ease;
+        overflow-y: auto;
     }
 
-    /* Directional positioning */
+    /* RTL: sidebar slides in from the right */
     [dir="rtl"] .sidebar {
         right: 0;
+        left: auto;
         transform: translateX(100%);
         border-left: 1px solid var(--border-color);
     }
 
+    /* LTR: sidebar slides in from the left */
     [dir="ltr"] .sidebar {
         left: 0;
+        right: auto;
         transform: translateX(-100%);
         border-right: 1px solid var(--border-color);
     }
 
+    /* Sidebar visible when opened */
     body.sidebar-open .sidebar {
         transform: translateX(0);
     }
 
-    /* Overlay — completely transparent, just a click-catcher */
+    /* ── Overlay: transparent click-catcher ── */
     .sidebar-overlay {
         display: none;
         position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: transparent !important;
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
-        filter: none !important;
-        z-index: 10000 !important;
+        inset: 0;
+        z-index: 1001;
+        background: rgba(0, 0, 0, 0.4);
     }
 
     body.sidebar-open .sidebar-overlay {
         display: block;
     }
 
+    /* ── Main Content ── */
     .main-content {
         width: 100%;
     }
 
     .content-header {
         padding: 0 16px;
+        background: var(--bg-primary);
     }
 
     .content-body {
         padding: 16px;
         overflow-y: visible;
-        /* Allow main body to scroll on mobile */
     }
 
-    #app {
-        height: auto;
-        min-height: 100vh;
-        overflow-y: auto;
-    }
-
-    /* POS Mobile Adjustments */
+    /* ── POS Mobile Adjustments ── */
     .pos-container {
         flex-direction: column !important;
         height: auto !important;
@@ -2123,7 +2118,7 @@ textarea.form-control {
         padding: 32px 20px;
     }
 
-    /* Hide text on some buttons in header for space */
+    /* ── Header condensed on mobile ── */
     .header-actions .btn span {
         display: none;
     }

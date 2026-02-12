@@ -55,7 +55,7 @@
             </button>
             <p id="login-hint" data-i18n="login_hint"
                 style="margin-top: 20px; font-size: 13px; color: var(--text-accent); font-weight: 600;">
-                Samir Mohamed | +966560400202
+                Samir Mohamed | +966568400202
             </p>
 
             <!-- Language Selector on Login -->
@@ -69,12 +69,14 @@
             </div>
         </div>
     </div>
-    <div class="sidebar-overlay" onclick="App.toggleSidebar()"></div>
 
     <!-- ═══════════════════════════════════════════════════ -->
     <!-- MAIN APPLICATION                                    -->
     <!-- ═══════════════════════════════════════════════════ -->
     <div id="app" style="display: none;">
+
+        <!-- Sidebar Overlay (click to close on mobile) -->
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
