@@ -176,6 +176,20 @@ const Invoices = {
     },
 
     /* ── A4 Invoice Print ── */
+    viewInvoice(id) {
+        const sale = db.getById('sales', id);
+        if (!sale) return;
+        // reuse existing printInvoice logic or creating a view modal
+        this.printInvoice(id);
+    },
+
+    printReceipt(id) {
+        const sale = db.getById('sales', id);
+        if (sale) {
+            Receipt.print(sale);
+        }
+    },
+
     printInvoice(id) {
         const sale = db.getById('sales', id);
         if (!sale) return;

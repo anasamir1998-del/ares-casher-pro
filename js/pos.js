@@ -257,8 +257,6 @@ const POS = {
                 <select class="form-control" id="discount-type">
                     <option value="percent" ${this.discountType === 'percent' ? 'selected' : ''}>${t('discount_percent')}</option>
                     <option value="fixed" ${this.discountType === 'fixed' ? 'selected' : ''}>${t('discount_fixed')}</option>
-                </select>
-            </div>
             <div class="form-group">
                 <label>${t('discount_value')}</label>
                 <input type="number" class="form-control" id="discount-value" value="${this.discountValue}" min="0" step="0.01">
@@ -282,6 +280,7 @@ const POS = {
             Toast.show(t('warning'), t('cart_empty_hold'), 'warning');
             return;
         }
+
         const held = db.getCollection('held_orders');
         held.push({
             id: Utils.generateId(),
@@ -486,8 +485,8 @@ const POS = {
                 </div>
             `, `
                 <button class="btn btn-primary" onclick="Invoices.viewInvoice('${sale.id}')">🧾 ${t('view_invoice')}</button>
-                <button class="btn btn-success" onclick="Invoices.printReceipt('${sale.id}')">🧾 ${t('print_receipt')}</button>
-                <button class="btn btn-ghost" onclick="Invoices.printInvoice('${sale.id}')">🖨️ ${t('print_a4')}</button>
+                <button class="btn btn-success" onclick="Receipt.print(${JSON.stringify(invoice).replace(/"/g, '&quot;')});">🖨️ ${t('print_receipt')}</button>
+                <button class="btn btn-ghost" onclick="Invoices.printInvoice('${sale.id}')">📄 ${t('print_a4')}</button>
                 <button class="btn btn-ghost" onclick="Modal.hide(); POS.render();">${t('new_sale')}</button>
             `);
         }, 500);
