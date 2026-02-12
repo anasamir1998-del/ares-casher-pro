@@ -25,11 +25,12 @@ const Settings = {
     applyShopName() {
         const name = db.getSetting('company_name', 'ARES');
         const nameEn = db.getSetting('company_name_en', 'Casher Pro');
+        const logo = db.getSetting('company_logo', '');
 
         // Update document title
         document.title = `${name} — ${nameEn}`;
 
-        // Update UI elements
+        // Update UI elements (Text)
         const loginBrand = document.getElementById('brand-name-login');
         const sidebarBrand = document.getElementById('brand-name-sidebar');
         const sidebarSubtitle = document.getElementById('brand-subtitle-sidebar');
@@ -39,6 +40,28 @@ const Settings = {
         if (sidebarBrand) sidebarBrand.textContent = name;
         if (sidebarSubtitle) sidebarSubtitle.textContent = nameEn;
         if (topbarBrand) topbarBrand.textContent = name;
+
+        // Update UI elements (Logo)
+        const logos = [
+            document.getElementById('login-logo'),
+            document.getElementById('sidebar-logo'),
+            document.getElementById('topbar-logo')
+        ];
+
+        logos.forEach(el => {
+            if (!el) return;
+            if (logo) {
+                el.innerHTML = `<img src="${logo}" style="width:100%; height:100%; object-fit:contain; border-radius:inherit;" alt="UA">`;
+                el.style.background = 'transparent'; // Remove gradient background if logo present
+                el.style.boxShadow = 'none';
+            } else {
+                // Fallback to first letter
+                const letter = (nameEn || name || 'A').charAt(0).toUpperCase();
+                el.innerHTML = letter;
+                el.style.background = ''; // Restore gradient
+                el.style.boxShadow = '';
+            }
+        });
     },
 
     switchTab(btn, tab) {
