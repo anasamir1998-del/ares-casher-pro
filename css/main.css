@@ -2236,6 +2236,55 @@ body.nav-topbar .content-body {
     .header-actions {
         gap: 8px;
     }
+
+    /* ── Mobile: Topbar mode ── */
+    body.nav-topbar .sidebar,
+    body.nav-topbar .sidebar-overlay {
+        display: none !important;
+    }
+
+    body.nav-topbar .topbar {
+        display: flex;
+        flex-wrap: wrap;
+        height: auto;
+        min-height: 50px;
+        padding: 8px 12px;
+        gap: 8px;
+    }
+
+    body.nav-topbar .topbar-nav {
+        order: 3;
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 4px;
+    }
+
+    body.nav-topbar .topbar-link span {
+        font-size: 0;
+        width: 0;
+        overflow: hidden;
+    }
+
+    body.nav-topbar .topbar-link i {
+        font-size: 18px;
+    }
+
+    body.nav-topbar .topbar-link {
+        padding: 8px 12px;
+    }
+
+    body.nav-topbar .content-header {
+        display: none;
+    }
+
+    body.nav-topbar .menu-toggle {
+        display: none;
+    }
+
+    /* ── Mobile: Sidebar mode — hide topbar ── */
+    body:not(.nav-topbar) .topbar {
+        display: none !important;
+    }
 }
 
 /* ── Menu Toggle Button (Hamburger) ── */

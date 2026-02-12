@@ -120,9 +120,12 @@ const App = {
         } else {
             document.body.classList.remove('nav-topbar');
         }
-        // Update the toggle button icon
-        const btn = document.getElementById('nav-mode-btn');
-        if (btn) btn.textContent = mode === 'topbar' ? '📋' : '📐';
+        // Update both toggle button icons
+        const icon = mode === 'topbar' ? '📋' : '📐';
+        const btn1 = document.getElementById('nav-mode-btn');
+        const btn2 = document.getElementById('nav-mode-btn-top');
+        if (btn1) btn1.textContent = icon;
+        if (btn2) btn2.textContent = icon;
     },
 
     showLanguageSelector() {
