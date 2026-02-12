@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARES Casher Pro — نظام كاشير احترافي</title>
+    <meta name="description"
+        content="نظام نقاط البيع الاحترافي مع دعم ضريبة القيمة المضافة المتوافق مع متطلبات ZATCA في المملكة العربية السعودية">
+
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=Noto+Nastaliq+Urdu:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- QR Code Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/main.css">
+
+    <style>
+        /* Inline critical path fix for flex style */
+        .flex-1 {
+            flex: 1;
+        }
+
+        .mb-4 {
+            margin-bottom: 4px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- LOGIN OVERLAY                                       -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <div class="login-overlay" id="login-overlay">
+        <div class="login-card">
+            <div class="login-logo">A</div>
+            <h1 class="text-gradient">ARES Casher Pro</h1>
+            <p id="login-subtitle">نظام كاشير احترافي — سجّل الدخول للمتابعة</p>
+
+            <div class="form-group">
+                <input type="text" class="form-control" id="login-username" placeholder="اسم المستخدم"
+                    autocomplete="username">
+            </div>
+            <div class="form-group">
+                <input type="password" class="form-control" id="login-password" placeholder="كلمة المرور"
+                    autocomplete="current-password" onkeydown="if(event.key==='Enter') App.handleLogin();">
+            </div>
+            <button class="btn btn-primary btn-xl btn-block" onclick="App.handleLogin()" id="login-btn">
+                تسجيل الدخول
+            </button>
+            <p style="margin-top: 20px; font-size: 12px; color: var(--text-muted);">
+                المستخدم الافتراضي: admin | كلمة المرور: 123
+            </p>
+
+            <!-- Language Selector on Login -->
+            <div style="margin-top: 16px; display: flex; gap: 8px; justify-content: center;">
+                <button class="btn btn-ghost btn-sm lang-btn" onclick="App.switchLanguage('ar')"
+                    style="font-size:13px; padding: 6px 12px;">🇸🇦 العربية</button>
+                <button class="btn btn-ghost btn-sm lang-btn" onclick="App.switchLanguage('en')"
+                    style="font-size:13px; padding: 6px 12px;">🇬🇧 English</button>
+                <button class="btn btn-ghost btn-sm lang-btn" onclick="App.switchLanguage('ur')"
+                    style="font-size:13px; padding: 6px 12px;">🇵🇰 اردو</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- MAIN APPLICATION                                    -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <div id="app" style="display: none;">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">A</div>
+                <div class="sidebar-brand">
+                    <h2>ARES</h2>
+                    <span>CASHER PRO</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section-title" id="nav-main-label">الرئيسية</div>
+                <div class="nav-item active" data-screen="dashboard" onclick="App.navigate('dashboard')">
+                    <i>📊</i> <span class="nav-text" data-i18n="dashboard">لوحة التحكم</span>
+                </div>
+                <div class="nav-item" data-screen="pos" onclick="App.navigate('pos')">
+                    <i>🛒</i> <span class="nav-text" data-i18n="pos">شاشة البيع</span>
+                </div>
+                <div class="nav-item" data-screen="invoices" onclick="App.navigate('invoices')">
+                    <i>🧾</i> <span class="nav-text" data-i18n="invoices">الفواتير</span>
+                </div>
+                <div class="nav-item" data-screen="shifts" onclick="App.navigate('shifts')">
+                    <i>⏰</i> <span class="nav-text" data-i18n="shifts">الورديات</span>
+                </div>
+
+                <div id="admin-nav">
+                    <div class="nav-section-title" id="nav-admin-label">الإدارة</div>
+                    <div class="nav-item" data-screen="products" onclick="App.navigate('products')">
+                        <i>📦</i> <span class="nav-text" data-i18n="products">المنتجات</span>
+                    </div>
+                    <div class="nav-item" data-screen="customers" onclick="App.navigate('customers')">
+                        <i>👥</i> <span class="nav-text" data-i18n="customers">العملاء</span>
+                    </div>
+                    <div class="nav-item" data-screen="reports" onclick="App.navigate('reports')">
+                        <i>📈</i> <span class="nav-text" data-i18n="reports">التقارير</span>
+                    </div>
+                    <div class="nav-item" data-screen="settings" onclick="App.navigate('settings')">
+                        <i>⚙️</i> <span class="nav-text" data-i18n="settings">الإعدادات</span>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar" id="user-avatar">م</div>
+                    <div class="user-details" style="flex:1;">
+                        <h4 id="user-name">المستخدم</h4>
+                        <span id="user-role">—</span>
+                    </div>
+                    <button class="btn btn-ghost btn-sm" onclick="Auth.logout()" id="logout-btn" title="تسجيل الخروج"
+                        style="padding:6px; border:none;">🚪</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1 id="header-title">📊 لوحة التحكم</h1>
+                <div class="header-actions">
+                    <span style="font-size: 13px; color: var(--text-muted);" id="header-date"></span>
+                    <!-- Language Selector -->
+                    <button class="theme-toggle" onclick="App.showLanguageSelector()" title="تغيير اللغة"
+                        style="font-size: 16px;">🌐</button>
+                    <button class="theme-toggle" id="theme-toggle-btn" onclick="App.toggleTheme()"
+                        title="تبديل المظهر">☀️</button>
+                    <button class="notification-bell" onclick="App.showNotifications()" title="التنبيهات">
+                        🔔
+                        <span class="badge-dot" id="notif-dot" style="display:none;"></span>
+                    </button>
+                    <button class="btn btn-ghost btn-sm" onclick="App.showKeyboardShortcuts()"
+                        title="اختصارات لوحة المفاتيح" style="font-size:16px; padding:10px;">⌨️</button>
+                    <div style="width:8px; height:8px; border-radius:50%; background:var(--success);"></div>
+                </div>
+            </header>
+            <div class="content-body" id="content-body">
+                <!-- Dynamic content loads here -->
+            </div>
+        </main>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- MODAL                                               -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this) Modal.hide();">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modal-title">عنوان</h2>
+                <button class="modal-close" onclick="Modal.hide()">✕</button>
+            </div>
+            <div class="modal-body" id="modal-body"></div>
+            <div class="modal-footer" id="modal-footer"></div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- TOAST NOTIFICATIONS                                -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- SCRIPTS                                             -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <script src="js/i18n.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/pos.js"></script>
+    <script src="js/products.js"></script>
+    <script src="js/customers.js"></script>
+    <script src="js/invoices.js"></script>
+    <script src="js/reports.js"></script>
+    <script src="js/shifts.js"></script>
+    <script src="js/settings.js"></script>
+
+    <!-- Update header date -->
+    <script>
+        (function updateHeaderDate() {
+            const el = document.getElementById('header-date');
+            if (el) {
+                const now = new Date();
+                const locale = I18n.currentLang === 'ur' ? 'ur-PK' : I18n.currentLang === 'en' ? 'en-US' : 'ar-SA';
+                el.textContent = now.toLocaleDateString(locale, {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            }
+            setInterval(updateHeaderDate, 60000);
+        })();
+    </script>
+</body>
+
+</html>
