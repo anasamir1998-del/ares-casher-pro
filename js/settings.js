@@ -98,7 +98,7 @@ const Settings = {
     renderCompanySettings() {
         const logo = db.getSetting('company_logo', '');
         return `
-            <div class="glass-card p-24" style="max-width: 700px;">
+            <div class="glass-card p-24">
                 <h3 style="margin-bottom: 20px;">🏢 ${t('company_info')}</h3>
                 
                 <!-- Logo Upload -->
@@ -191,7 +191,7 @@ const Settings = {
 
     renderTaxSettings() {
         return `
-            <div class="glass-card p-24" style="max-width: 700px;">
+            <div class="glass-card p-24">
                 <h3 style="margin-bottom: 20px;">🏦 ${t('vat_settings')}</h3>
                 <div class="glass-card p-20 mb-20" style="background: var(--warning-bg); border-color: rgba(255,170,0,0.2);">
                     <p style="font-size:13px; color: var(--warning);">
@@ -422,7 +422,7 @@ const Settings = {
     renderAppearanceSettings() {
         const currentTheme = localStorage.getItem('ares_theme') || 'dark';
         return `
-            <div class="glass-card p-24" style="max-width:700px;">
+            <div class="glass-card p-24">
                 <h3 style="margin-bottom:20px;">🎨 ${t('appearance_settings')}</h3>
                 
                 <div class="grid-2 mb-20">
@@ -468,7 +468,7 @@ const Settings = {
         ];
 
         return `
-            <div class="glass-card p-24" style="max-width:700px;">
+            <div class="glass-card p-24">
                 <h3 style="margin-bottom:20px;">⌨️ ${t('keyboard_shortcuts')}</h3>
                 <div class="shortcuts-grid">
                     ${shortcuts.map(s => `
@@ -485,7 +485,7 @@ const Settings = {
     /* ── Backup ── */
     renderBackupSettings() {
         return `
-            <div class="glass-card p-24" style="max-width:700px;">
+            <div class="glass-card p-24">
                 <h3 style="margin-bottom:20px;">💾 ${t('backup_restore')}</h3>
 
                 <div class="glass-card p-20 mb-20" style="background: var(--success-bg); border-color: rgba(0,214,143,0.2);">
