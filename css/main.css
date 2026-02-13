@@ -778,6 +778,42 @@ select.form-control {
     background-repeat: no-repeat;
     background-position: left 12px center;
     padding-inline-start: 36px;
+    cursor: pointer;
+}
+
+/* Style dropdown options (native) */
+select.form-control option {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    padding: 10px 16px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 14px;
+}
+
+select.form-control option:checked {
+    background: var(--accent-start);
+    color: white;
+}
+
+select.form-control option:hover {
+    background: var(--bg-glass-hover);
+}
+
+select.form-control optgroup {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    font-weight: 700;
+}
+
+/* Light theme select options */
+[data-theme="light"] select.form-control option {
+    background: #ffffff;
+    color: #1a1a2e;
+}
+
+[data-theme="light"] select.form-control option:checked {
+    background: var(--accent-start);
+    color: white;
 }
 
 textarea.form-control {
