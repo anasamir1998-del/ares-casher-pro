@@ -27,6 +27,8 @@ const Settings = {
         const nameEn = db.getSetting('company_name_en', 'Casher Pro');
         const logo = db.getSetting('company_logo', '');
 
+        console.log('[applyShopName] name:', name, '| nameEn:', nameEn, '| logo:', logo ? '(has logo)' : '(no logo)');
+
         // Update document title
         document.title = `${name} — ${nameEn}`;
 
@@ -36,32 +38,47 @@ const Settings = {
         const sidebarSubtitle = document.getElementById('brand-subtitle-sidebar');
         const topbarBrand = document.getElementById('brand-name-topbar');
 
+        console.log('[applyShopName] Elements found:', {
+            loginBrand: !!loginBrand,
+            sidebarBrand: !!sidebarBrand,
+            sidebarSubtitle: !!sidebarSubtitle,
+            topbarBrand: !!topbarBrand
+        });
+
         if (loginBrand) loginBrand.textContent = name + ' ' + nameEn;
         if (sidebarBrand) sidebarBrand.textContent = name;
         if (sidebarSubtitle) sidebarSubtitle.textContent = nameEn;
         if (topbarBrand) topbarBrand.textContent = name;
 
         // Update UI elements (Logo)
-        const logos = [
-            document.getElementById('login-logo'),
-            document.getElementById('sidebar-logo'),
-            document.getElementById('topbar-logo')
-        ];
+        const loginLogo = document.getElementById('login-logo');
+        const sidebarLogo = document.getElementById('sidebar-logo');
+        const topbarLogo = document.getElementById('topbar-logo');
+
+        console.log('[applyShopName] Logo elements found:', {
+            loginLogo: !!loginLogo,
+            sidebarLogo: !!sidebarLogo,
+            topbarLogo: !!topbarLogo
+        });
+
+        const logos = [loginLogo, sidebarLogo, topbarLogo];
 
         logos.forEach(el => {
             if (!el) return;
             if (logo) {
-                el.innerHTML = `<img src="${logo}" style="width:100%; height:100%; object-fit:contain; border-radius:inherit;" alt="UA">`;
-                el.style.background = 'transparent'; // Remove gradient background if logo present
+                el.innerHTML = `<img src="${logo}" style="width:100%; height:100%; object-fit:contain; border-radius:inherit;" alt="logo">`;
+                el.style.background = 'transparent';
                 el.style.boxShadow = 'none';
             } else {
                 // Fallback to first letter
                 const letter = (nameEn || name || 'A').charAt(0).toUpperCase();
                 el.innerHTML = letter;
-                el.style.background = ''; // Restore gradient
+                el.style.background = '';
                 el.style.boxShadow = '';
             }
         });
+
+        console.log('[applyShopName] Done. Sidebar now shows:', sidebarBrand?.textContent, '| Topbar:', topbarBrand?.textContent);
     },
 
     switchTab(btn, tab) {

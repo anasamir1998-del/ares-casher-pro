@@ -7,6 +7,7 @@ const App = {
     activeShiftId: null,
 
     init() {
+        console.log('[App.init] Starting...');
         // Restore theme
         this.loadTheme();
 
@@ -22,28 +23,40 @@ const App = {
         // Check session
         const user = Auth.getSession();
         if (user) {
+            console.log('[App.init] User session found, calling onLoginSuccess');
             this.onLoginSuccess(user, true);
         } else {
+            console.log('[App.init] No user session, showing login');
             this.showLogin();
         }
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => this.handleShortcuts(e));
 
         // Apply shop name/branding LAST — after all UI is set up
+        console.log('[App.init] Calling applyBranding...');
         this.applyBranding();
+        console.log('[App.init] Done.');
     },
 
     /* ── Apply Branding (name + logo everywhere) ── */
     applyBranding() {
+        console.log('[applyBranding] Running immediate call');
         if (window.Settings && Settings.applyShopName) {
             Settings.applyShopName();
         }
-        // Also apply after a short delay to catch any async renders
+        // Also apply after delays to catch any late renders
         setTimeout(() => {
+            console.log('[applyBranding] Running 200ms delayed call');
             if (window.Settings && Settings.applyShopName) {
                 Settings.applyShopName();
             }
-        }, 100);
+        }, 200);
+        setTimeout(() => {
+            console.log('[applyBranding] Running 500ms delayed call');
+            if (window.Settings && Settings.applyShopName) {
+                Settings.applyShopName();
+            }
+        }, 500);
     },
 
     /* ── Theme Management ── */
