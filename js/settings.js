@@ -328,7 +328,7 @@ const Settings = {
         });
 
         // Value settings
-        const valKeys = ['inv_qr_position', 'inv_footer_text', 'inv_font_size', 'inv_paper_width'];
+        const valKeys = ['inv_qr_position', 'inv_qr_align', 'inv_footer_text', 'inv_font_size', 'inv_paper_width'];
         valKeys.forEach(key => {
             const el = document.getElementById(key);
             if (el) db.setSetting(key, el.value);
@@ -670,6 +670,15 @@ const Settings = {
                             <select class="form-control" id="inv_qr_position">
                                 <option value="bottom" ${getVal('inv_qr_position', 'bottom') === 'bottom' ? 'selected' : ''}>${t('qr_bottom')}</option>
                                 <option value="top" ${getVal('inv_qr_position', 'bottom') === 'top' ? 'selected' : ''}>${t('qr_top')}</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group mt-10">
+                            <label>${t('qr_align')}</label>
+                            <select class="form-control" id="inv_qr_align">
+                                <option value="center" ${getVal('inv_qr_align', 'center') === 'center' ? 'selected' : ''}>${t('qr_align_center')}</option>
+                                <option value="right" ${getVal('inv_qr_align', 'center') === 'right' ? 'selected' : ''}>${t('qr_align_right')}</option>
+                                <option value="left" ${getVal('inv_qr_align', 'center') === 'left' ? 'selected' : ''}>${t('qr_align_left')}</option>
                             </select>
                         </div>
                     </div>

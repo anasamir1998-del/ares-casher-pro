@@ -491,6 +491,11 @@ const I18n = {
         qr_top: { ar: 'أعلى الفاتورة (قبل الأصناف)', en: 'Top (Before Items)', ur: 'اوپر (اشیاء سے پہلے)' },
         qr_bottom: { ar: 'أسفل الفاتورة (بعد الإجمالي)', en: 'Bottom (After Total)', ur: 'نیچے (کل کے بعد)' },
 
+        qr_align: { ar: 'محاذاة الـ QR', en: 'QR Alignment', ur: 'QR کی سیدھ' },
+        qr_align_center: { ar: 'وسط', en: 'Center', ur: 'درمیان' },
+        qr_align_right: { ar: 'يمين', en: 'Right', ur: 'دائیں' },
+        qr_align_left: { ar: 'يسار', en: 'Left', ur: 'بائیں' },
+
         show_footer: { ar: 'إظهار التذييل', en: 'Show Footer', ur: 'فوٹر دکھائیں' },
         footer_text: { ar: 'نص التذييل', en: 'Footer Text', ur: 'فوٹر کا متن' },
         font_size: { ar: 'حجم الخط', en: 'Font Size', ur: 'فونٹ سائز' },

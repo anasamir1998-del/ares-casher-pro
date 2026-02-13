@@ -311,6 +311,7 @@ const Invoices = {
 
         const showQr = getBool('inv_show_qr');
         const qrPosition = db.getSetting('inv_qr_position', 'bottom'); // top, bottom
+        const qrAlign = db.getSetting('inv_qr_align', 'center'); // center, right, left
 
         const showFooter = getBool('inv_show_footer');
         const footerText = db.getSetting('inv_footer_text', t('thank_you') || 'Thank you');
@@ -359,7 +360,7 @@ const Invoices = {
                     .total-row { display:flex; justify-content:space-between; padding:2px 0; font-size:1em; }
                     .grand-total { font-size:1.3em; font-weight:800; padding:4px 0; border-top:2px solid #000; margin-top:4px; }
                     .footer { text-align:center; margin-top:6px; padding-top:6px; border-top:1px dashed #000; font-size:0.9em; color:#555; }
-                    #receipt-qr { text-align:center; margin:8px 0; }
+                    #receipt-qr { text-align:${qrAlign}; margin:8px 0; }
                     #receipt-qr canvas, #receipt-qr img { max-width:120px !important; max-height:120px !important; }
                     
                     @media print {
