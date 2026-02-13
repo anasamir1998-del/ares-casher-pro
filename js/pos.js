@@ -485,7 +485,7 @@ const POS = {
                 </div>
             `, `
                 <button class="btn btn-primary" onclick="Invoices.viewInvoice('${sale.id}')">🧾 ${t('view_invoice')}</button>
-                <button class="btn btn-success" onclick="Receipt.print(${JSON.stringify(invoice).replace(/"/g, '&quot;')});">🖨️ ${t('print_receipt')}</button>
+                <button class="btn btn-success" onclick="Invoices.printReceipt('${sale.id}')">🖨️ ${t('print_receipt')}</button>
                 <button class="btn btn-ghost" onclick="Invoices.printInvoice('${sale.id}')">📄 ${t('print_a4')}</button>
                 <button class="btn btn-ghost" onclick="Modal.hide(); POS.render();">${t('new_sale')}</button>
             `);

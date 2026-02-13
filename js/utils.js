@@ -16,9 +16,10 @@ const Utils = {
         }).format(amount || 0);
     },
 
-    // Format currency with symbol
+    // Format currency with symbol (reads from settings)
     formatSAR(amount) {
-        return `${this.formatCurrency(amount)} ر.س`;
+        const currency = (typeof db !== 'undefined') ? db.getSetting('currency', 'ر.س') : 'ر.س';
+        return `${this.formatCurrency(amount)} ${currency}`;
     },
 
     // Format date

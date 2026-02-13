@@ -16,7 +16,15 @@ class Database {
 
     // Set collection
     setCollection(name, data) {
-        localStorage.setItem(this.prefix + name, JSON.stringify(data));
+        try {
+            localStorage.setItem(this.prefix + name, JSON.stringify(data));
+        } catch (e) {
+            console.error('localStorage save error:', e);
+            // Quota exceeded — notify user if possible
+            if (typeof Toast !== 'undefined') {
+                Toast.show('⚠️ خطأ', 'مساحة التخزين ممتلئة', 'error');
+            }
+        }
     }
 
     // Get single document by ID
@@ -124,8 +132,10 @@ class Database {
             cats.forEach(c => this.insert('categories', c));
         }
 
-        // Default settings
-        if (!this.getSetting('company_name')) {
+        // Default settings — only set if NEVER initialized before
+        const settings = this.getCollection('settings');
+        const hasInit = settings.find(s => s.key === '_initialized');
+        if (!hasInit) {
             this.setSetting('company_name', 'ARES Casher Pro');
             this.setSetting('company_name_en', 'ARES Casher Pro');
             this.setSetting('vat_number', '300000000000003');
@@ -135,6 +145,7 @@ class Database {
             this.setSetting('vat_rate', '15');
             this.setSetting('currency', 'ر.س');
             this.setSetting('invoice_counter', '0');
+            this.setSetting('_initialized', 'true');
         }
 
         // Sample products if empty

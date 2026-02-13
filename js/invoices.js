@@ -183,12 +183,6 @@ const Invoices = {
         this.printInvoice(id);
     },
 
-    printReceipt(id) {
-        const sale = db.getById('sales', id);
-        if (sale) {
-            Receipt.print(sale);
-        }
-    },
 
     printInvoice(id) {
         const sale = db.getById('sales', id);

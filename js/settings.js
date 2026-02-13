@@ -144,8 +144,9 @@ const Settings = {
         reader.onload = (e) => {
             db.setSetting('company_logo', e.target.result);
             Toast.show(t('success'), t('logo_uploaded'), 'success');
-            // Re-render
+            // Re-render and apply branding
             document.getElementById('settings-content').innerHTML = this.renderCompanySettings();
+            this.applyShopName();
         };
         reader.readAsDataURL(file);
     },
@@ -154,6 +155,7 @@ const Settings = {
         db.setSetting('company_logo', '');
         Toast.show(t('success'), t('logo_removed'), 'info');
         document.getElementById('settings-content').innerHTML = this.renderCompanySettings();
+        this.applyShopName();
     },
 
     saveCompany() {
