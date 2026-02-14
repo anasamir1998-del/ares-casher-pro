@@ -8,6 +8,11 @@ const Utils = {
         return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
     },
 
+    // Get name (simplified)
+    getName(product) {
+        return product ? product.name : '';
+    },
+
     // Format currency (SAR)
     formatCurrency(amount) {
         return new Intl.NumberFormat('ar-SA', {

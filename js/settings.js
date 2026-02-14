@@ -174,7 +174,8 @@ const Settings = {
 
     saveCompany() {
         db.setSetting('company_name', document.getElementById('s-company-name').value.trim());
-        db.setSetting('company_name_en', document.getElementById('s-company-name-en').value.trim());
+        // db.setSetting('company_name_en', document.getElementById('s-company-name-en').value.trim()); // Removed
+
         db.setSetting('vat_number', document.getElementById('s-vat-number').value.trim());
         db.setSetting('cr_number', document.getElementById('s-cr-number').value.trim());
         db.setSetting('company_address', document.getElementById('s-address').value.trim());
