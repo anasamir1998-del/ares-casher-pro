@@ -151,7 +151,11 @@ const Purchases = {
             <div class="grid-layout" style="grid-template-columns: 1fr 350px; gap:24px;">
                 <!-- Left: Product Selection -->
                 <div class="glass-card p-24">
-                    ${this.editingPurchaseId ? `<div class="mb-20 p-24" style="background:#5e3a00; border-radius:8px; border:1px solid #ffd700;">⚠️ ${t('edit_mode_active')}</div>` : ''}
+                    ${this.editingPurchaseId ? `
+                    <div class="mb-20 p-24 flex justify-between items-center" style="background:#5e3a00; border-radius:8px; border:1px solid #ffd700;">
+                        <div>⚠️ ${t('edit_mode_active')}</div>
+                        <button class="btn btn-sm btn-outline" onclick="Purchases.switchTab(document.querySelectorAll('.tab-btn')[0], 'history')">${t('cancel')}</button>
+                    </div>` : ''}
                     <div class="grid-2 mb-20">
                         <div class="form-group">
                             <label>${t('select_supplier')}</label>
@@ -341,7 +345,7 @@ const Purchases = {
         const purchase = {
             supplierId,
             date,
-            items: this.cart,
+            items: this.cart.map(i => ({ ...i })), // Deep copy to prevent reference issues
             total,
             itemsCount: this.cart.length
         };
