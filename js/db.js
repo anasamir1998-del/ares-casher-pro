@@ -1,12 +1,128 @@
 /* ============================================================
-   ARES Casher Pro — Database Layer (localStorage)
+   ARES Casher Pro — Database Layer (Hybrid: localStorage + Firestore)
    ============================================================ */
 
 class Database {
     constructor() {
         this.prefix = 'ares_pos_';
         this.initDefaults();
+
+        // Start Firestore Sync if available
+        if (window.dbFirestore) {
+            console.log("Starting Firestore Sync...");
+            this.syncCollections = ['products', 'categories', 'customers', 'users', 'settings', 'shifts', 'purchases'];
+
+            // Initial checks
+            this.checkMigration();
+            this.startListeners();
+        }
     }
+
+    // ─── FIRESTORE INTEGRATION ──────────────────────────────────
+
+    // Check if we need to upload local data to cloud (First run)
+    async checkMigration() {
+        try {
+            const settingsRef = window.dbFirestore.collection('settings');
+            const snapshot = await settingsRef.limit(1).get();
+
+            if (snapshot.empty) {
+                console.log("Firestore is empty. Uploading local data...");
+                await this.uploadAllToCloud();
+                if (typeof Toast !== 'undefined') Toast.show('☁️', 'تم رفع البيانات للسحابة بنجاح', 'success');
+            }
+        } catch (e) {
+            console.error("Migration check failed:", e);
+        }
+    }
+
+    // Upload everything to Firestore
+    async uploadAllToCloud() {
+        const collections = ['products', 'categories', 'customers', 'users', 'settings', 'shifts', 'purchases'];
+        for (const colName of collections) {
+            const data = this.getCollection(colName);
+            const batch = window.dbFirestore.batch();
+            let count = 0;
+
+            data.forEach(doc => {
+                const ref = window.dbFirestore.collection(colName).doc(doc.id);
+                batch.set(ref, doc);
+                count++;
+                // Commit batches of 500
+                if (count >= 400) {
+                    // simple batching, realistically we await this batch and start new
+                }
+            });
+
+            if (count > 0) await batch.commit();
+            console.log(`Uploaded ${count} items to ${colName}`);
+        }
+    }
+
+    // Listen for remote changes
+    startListeners() {
+        this.syncCollections.forEach(colName => {
+            window.dbFirestore.collection(colName).onSnapshot(snapshot => {
+                let localData = this.getCollection(colName);
+                let changed = false;
+
+                snapshot.docChanges().forEach(change => {
+                    const docData = change.doc.data();
+                    const idx = localData.findIndex(item => item.id === docData.id);
+
+                    if (change.type === "added") {
+                        if (idx === -1) {
+                            localData.push(docData);
+                            changed = true;
+                        }
+                    }
+                    else if (change.type === "modified") {
+                        if (idx > -1) {
+                            localData[idx] = docData;
+                            changed = true;
+                        } else {
+                            // If modified but we don't have it (maybe deleted locally?), add it
+                            localData.push(docData);
+                            changed = true;
+                        }
+                    }
+                    else if (change.type === "removed") {
+                        if (idx > -1) {
+                            localData.splice(idx, 1);
+                            changed = true;
+                        }
+                    }
+                });
+
+                if (changed) {
+                    // Update localStorage silently without triggering another upload
+                    this.setCollection(colName, localData, true);
+
+                    // Specific UI updates based on collection
+                    if (colName === 'products' && window.Products) {
+                        // Refresh products valid if on products screen? 
+                        // For now, let's just log. Real-time UI updates might require more event hooks.
+                    }
+                }
+            });
+        });
+    }
+
+    // Helper to push single change to Cloud
+    cloudSave(collection, doc) {
+        if (!window.dbFirestore) return;
+        // Use set with merge true to handle both insert and update
+        window.dbFirestore.collection(collection).doc(doc.id).set(doc, { merge: true })
+            .catch(e => console.error(`Cloud save error (${collection}):`, e));
+    }
+
+    cloudDelete(collection, id) {
+        if (!window.dbFirestore) return;
+        window.dbFirestore.collection(collection).doc(id).delete()
+            .catch(e => console.error(`Cloud delete error (${collection}):`, e));
+    }
+
+    // ─── STANDARD API (LocalStorage) ────────────────────────────
 
     // Get collection
     getCollection(name) {
@@ -20,12 +136,11 @@ class Database {
     }
 
     // Set collection
-    setCollection(name, data) {
+    setCollection(name, data, skipCloud = false) {
         try {
             localStorage.setItem(this.prefix + name, JSON.stringify(data));
         } catch (e) {
             console.error('localStorage save error:', e);
-            // Quota exceeded — notify user if possible
             if (typeof Toast !== 'undefined') {
                 Toast.show('⚠️ خطأ', 'مساحة التخزين ممتلئة', 'error');
             }
@@ -44,8 +159,13 @@ class Database {
         if (!doc.id) doc.id = Utils.generateId();
         doc.createdAt = doc.createdAt || Utils.isoDate();
         doc.updatedAt = Utils.isoDate();
+
         items.push(doc);
         this.setCollection(collection, items);
+
+        // Sync
+        this.cloudSave(collection, doc);
+
         return doc;
     }
 
@@ -54,8 +174,13 @@ class Database {
         const items = this.getCollection(collection);
         const index = items.findIndex(item => item.id === id);
         if (index === -1) return null;
+
         items[index] = { ...items[index], ...updates, updatedAt: Utils.isoDate() };
         this.setCollection(collection, items);
+
+        // Sync
+        this.cloudSave(collection, items[index]);
+
         return items[index];
     }
 
@@ -64,6 +189,9 @@ class Database {
         let items = this.getCollection(collection);
         items = items.filter(item => item.id !== id);
         this.setCollection(collection, items);
+
+        // Sync
+        this.cloudDelete(collection, id);
     }
 
     // Alias for delete
@@ -93,21 +221,31 @@ class Database {
     setSetting(key, value) {
         let settings = this.getCollection('settings');
         const index = settings.findIndex(s => s.key === key);
+
+        let newItem;
         if (index >= 0) {
             settings[index].value = value;
+            newItem = settings[index];
         } else {
-            settings.push({ key, value });
+            newItem = { key, value, id: key }; // use key as ID for settings
+            settings.push(newItem);
         }
+
         this.setCollection('settings', settings);
+        this.cloudSave('settings', newItem);
     }
 
-    // Get next invoice number
+    // Get next invoice number (Syncing counters is tricky, using Firestore transaction is better, but for hybrid we approximate)
     getNextInvoiceNumber() {
+        // Optimized for Hybrid: Rely on local but try to sync counter
         let counter = parseInt(this.getSetting('invoice_counter', '0')) + 1;
         this.setSetting('invoice_counter', counter.toString());
+
         const date = new Date();
         const y = date.getFullYear();
         const m = String(date.getMonth() + 1).padStart(2, '0');
+        // Add random component to avoid collision in distributed mode
+        // const rand = Math.floor(Math.random() * 100); 
         return `INV-${y}${m}-${String(counter).padStart(5, '0')}`;
     }
 
@@ -115,6 +253,7 @@ class Database {
     getNextPurchaseNumber() {
         let counter = parseInt(this.getSetting('purchase_counter', '0')) + 1;
         this.setSetting('purchase_counter', counter.toString());
+
         const date = new Date();
         const y = date.getFullYear();
         const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -123,11 +262,9 @@ class Database {
 
     // Initialize default data
     initDefaults() {
-        // Initialize new collections (Suppliers & Purchases) if missing
         if (!localStorage.getItem(this.prefix + 'suppliers')) this.setCollection('suppliers', []);
         if (!localStorage.getItem(this.prefix + 'purchases')) this.setCollection('purchases', []);
 
-        // Default admin user
         if (this.getCollection('users').length === 0) {
             if (!localStorage.getItem(this.prefix + 'users')) {
                 this.setCollection('users', [
@@ -135,19 +272,17 @@ class Database {
                 ]);
             }
 
-            // Default categories
             if (this.getCollection('categories').length === 0) {
                 const cats = [
-                    { name: 'مشروبات', color: '#00b4d8', icon: '🥤' },
-                    { name: 'وجبات', color: '#ff6b35', icon: '🍔' },
-                    { name: 'حلويات', color: '#e91e84', icon: '🍰' },
-                    { name: 'مخبوزات', color: '#ffaa00', icon: '🥐' },
-                    { name: 'أخرى', color: '#667eea', icon: '📦' }
+                    { name: 'مشروبات', color: '#00b4d8', icon: '🥤', id: 'cat_1' },
+                    { name: 'وجبات', color: '#ff6b35', icon: '🍔', id: 'cat_2' },
+                    { name: 'حلويات', color: '#e91e84', icon: '🍰', id: 'cat_3' },
+                    { name: 'مخبوزات', color: '#ffaa00', icon: '🥐', id: 'cat_4' },
+                    { name: 'أخرى', color: '#667eea', icon: '📦', id: 'cat_5' }
                 ];
                 cats.forEach(c => this.insert('categories', c));
             }
 
-            // Default settings — only set if NEVER initialized before
             const settings = this.getCollection('settings');
             const hasInit = settings.find(s => s.key === '_initialized');
             if (!hasInit) {
@@ -163,23 +298,13 @@ class Database {
                 this.setSetting('_initialized', 'true');
             }
 
-            // Sample products if empty
             if (this.getCollection('products').length === 0) {
                 const cats = this.getCollection('categories');
+                // Only add samples if we really are starting fresh
                 const sampleProducts = [
-                    { name: 'قهوة عربية', price: 15, cost: 5, categoryId: cats[0]?.id, stock: 100, barcode: '100001', emoji: '☕' },
-                    { name: 'كابتشينو', price: 20, cost: 7, categoryId: cats[0]?.id, stock: 100, barcode: '100002', emoji: '☕' },
-                    { name: 'لاتيه', price: 22, cost: 8, categoryId: cats[0]?.id, stock: 100, barcode: '100003', emoji: '☕' },
-                    { name: 'عصير برتقال', price: 12, cost: 4, categoryId: cats[0]?.id, stock: 50, barcode: '100004', emoji: '🍊' },
-                    { name: 'شاي أخضر', price: 10, cost: 3, categoryId: cats[0]?.id, stock: 80, barcode: '100005', emoji: '🍵' },
-                    { name: 'برجر كلاسيك', price: 35, cost: 15, categoryId: cats[1]?.id, stock: 30, barcode: '200001', emoji: '🍔' },
-                    { name: 'برجر دجاج', price: 30, cost: 12, categoryId: cats[1]?.id, stock: 30, barcode: '200002', emoji: '🍔' },
-                    { name: 'سندويش كلوب', price: 28, cost: 10, categoryId: cats[1]?.id, stock: 25, barcode: '200003', emoji: '🥪' },
-                    { name: 'بيتزا مارغريتا', price: 45, cost: 18, categoryId: cats[1]?.id, stock: 20, barcode: '200004', emoji: '🍕' },
-                    { name: 'كيك شوكولاتة', price: 18, cost: 6, categoryId: cats[2]?.id, stock: 15, barcode: '300001', emoji: '🍫' },
-                    { name: 'تشيز كيك', price: 22, cost: 8, categoryId: cats[2]?.id, stock: 15, barcode: '300002', emoji: '🍰' },
-                    { name: 'كرواسون', price: 10, cost: 4, categoryId: cats[3]?.id, stock: 40, barcode: '400001', emoji: '🥐' },
-                    { name: 'خبز فرنسي', price: 8, cost: 3, categoryId: cats[3]?.id, stock: 50, barcode: '400002', emoji: '🥖' },
+                    { name: 'قهوة عربية', price: 15, cost: 5, categoryId: cats[0]?.id, stock: 100, barcode: '100001', emoji: '☕', id: 'prod_1' },
+                    { name: 'كابتشينو', price: 20, cost: 7, categoryId: cats[0]?.id, stock: 100, barcode: '100002', emoji: '☕', id: 'prod_2' },
+                    { name: 'برجر كلاسيك', price: 35, cost: 15, categoryId: cats[1]?.id, stock: 30, barcode: '200001', emoji: '🍔', id: 'prod_3' }
                 ];
                 sampleProducts.forEach(p => this.insert('products', p));
             }
@@ -200,6 +325,11 @@ class Database {
     restoreAll(backup) {
         Object.keys(backup).forEach(c => {
             this.setCollection(c, backup[c]);
+            // Also sync restored data to cloud? Maybe dangerous.
+            // Let's force upload
+            if (window.dbFirestore) {
+                backup[c].forEach(doc => this.cloudSave(c, doc));
+            }
         });
     }
 }

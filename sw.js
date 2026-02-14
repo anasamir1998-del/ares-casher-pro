@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ares-casher-pro-v1';
+const CACHE_NAME = 'ares-casher-pro-v2';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -6,9 +6,9 @@ const ASSETS_TO_CACHE = [
     './js/app.js',
     './js/auth.js',
     './js/db.js',
+    './js/firebase-config.js',
     './js/i18n.js',
     './js/invoices.js',
-    './js/modal.js',
     './js/pos.js',
     './js/products.js',
     './js/purchases.js',
@@ -16,7 +16,6 @@ const ASSETS_TO_CACHE = [
     './js/reports.js',
     './js/settings.js',
     './js/shifts.js',
-    './js/toast.js',
     './js/utils.js',
     'https://cdn-icons-png.flaticon.com/512/3144/3144456.png'
 ];

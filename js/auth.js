@@ -44,8 +44,20 @@ const Auth = {
         { key: 'manage_purchases', label: '🚚 إدارة المشتريات', group: 'الإدارة' },
     ],
 
-    login(username, password) {
-        const users = db.getCollection('users');
+    async login(username, password) {
+        // Try to get users from synced DB first
+        let users = db.getCollection('users');
+
+        // If users empty, maybe wait a bit for sync? 
+        if (users.length === 0 && window.dbFirestore) {
+            try {
+                const snapshot = await window.dbFirestore.collection('users').get();
+                users = snapshot.docs.map(d => d.data());
+                // Update local cache manually just in case
+                db.setCollection('users', users);
+            } catch (e) { console.error("Auth sync error", e); }
+        }
+
         const user = users.find(u => u.username === username && u.password === password);
 
         if (!user) return { success: false, message: 'اسم المستخدم أو كلمة المرور غير صحيحة' };
@@ -59,6 +71,7 @@ const Auth = {
     logout() {
         this.currentUser = null;
         sessionStorage.removeItem('ares_session');
+        if (window.authFirebase) window.authFirebase.signOut(); // Sign out from Firebase Auth too if we used it
         App.activeShiftId = null;
         App.showLogin();
     },

@@ -199,6 +199,7 @@
                 <div style="display:flex; align-items:center; gap:12px;">
                     <button class="menu-toggle" onclick="App.toggleSidebar()">☰</button>
                     <h1 id="header-title">📊 لوحة التحكم</h1>
+                    <span class="badge badge-success" style="font-size:10px;">v3.0 Cloud</span>
                 </div>
                 <div class="header-actions">
                     <span style="font-size: 13px; color: var(--text-muted);" id="header-date"></span>
@@ -248,29 +249,32 @@
     <!-- ═══════════════════════════════════════════════════ -->
     <!-- SCRIPTS                                             -->
     <!-- ═══════════════════════════════════════════════════ -->
-    <script src="js/i18n.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/db.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/app.js"></script>
-    <script src="js/dashboard.js"></script>
-    <script src="js/pos.js"></script>
-    <script src="js/products.js"></script>
-    <script src="js/settings.js"></script>
-    <script src="js/purchases.js?v=3.0"></script>
-    <script src="js/reports.js?v=2.8"></script>
-    <script src="js/shifts.js?v=2.9"></script>
-    <script src="js/sw-register.js"></script>
-    <!-- Libraries -->
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ar.js"></script>
 
-    <script src="js/customers.js"></script>
-    <script src="js/invoices.js?v=2.0"></script>
-    <script src="js/receipt.js"></script>
-    <script src="js/reports.js"></script>
-    <script src="js/shifts.js"></script>
-    <script src="js/settings.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+
+    <!-- Scripts -->
+    <script src="js/firebase-config.js?v=2"></script>
+    <script src="js/i18n.js?v=2"></script>
+    <script src="js/utils.js?v=2"></script>
+    <script src="js/db.js?v=3"></script>
+    <script src="js/auth.js?v=3"></script>
+    <script src="js/app.js?v=3"></script>
+    <script src="js/dashboard.js?v=2"></script>
+    <script src="js/pos.js?v=2"></script>
+    <script src="js/products.js?v=2"></script>
+    <script src="js/settings.js?v=4"></script> <!-- FORCE UPDATE -->
+    <script src="js/purchases.js?v=3.0"></script>
+    <script src="js/reports.js?v=3.0"></script>
+    <script src="js/shifts.js?v=3.0"></script>
+
+    <script src="js/customers.js?v=2"></script>
+    <script src="js/invoices.js?v=2.1"></script>
+    <script src="js/receipt.js?v=2"></script>
+
+    <script src="js/sw-register.js?v=2"></script>
 
     <!-- Update header date -->
     <script>

@@ -14,6 +14,7 @@ const Settings = {
                     <button class="tab-btn" onclick="Settings.switchTab(this, 'appearance')">🎨 ${t('appearance')}</button>
                     <button class="tab-btn" onclick="Settings.switchTab(this, 'shortcuts')">⌨️ ${t('keyboard_shortcuts')}</button>
                     <button class="tab-btn" onclick="Settings.switchTab(this, 'backup')">💾 ${t('backup')}</button>
+                    <button class="tab-btn" onclick="Settings.switchTab(this, 'cloud')">☁️ ${t('cloud_sync') || 'Cloud'}</button>
                 </div>
                 <div id="settings-content">
                     ${this.renderCompanySettings()}
@@ -92,6 +93,7 @@ const Settings = {
             case 'appearance': container.innerHTML = this.renderAppearanceSettings(); this.initInvoicePreviewListeners(); break;
             case 'shortcuts': container.innerHTML = this.renderShortcuts(); break;
             case 'backup': container.innerHTML = this.renderBackupSettings(); break;
+            case 'cloud': container.innerHTML = this.renderCloudSettings(); break;
         }
     },
 
@@ -983,8 +985,108 @@ const Settings = {
         setTimeout(() => {
             const tabs = document.querySelectorAll('.tab-btn');
             tabs.forEach(t => t.classList.remove('active'));
-            tabs[2].classList.add('active');
+            tabs[2].classList.add('active'); // Users tab
             document.getElementById('settings-content').innerHTML = this.renderUserManagement();
         }, 50);
+    },
+
+    /* ── Cloud Sync Settings ── */
+    renderCloudSettings() {
+        return `
+            <div class="glass-card p-24">
+                <h3 style="margin-bottom:20px;">☁️ ${t('cloud_sync') || 'Cloud Sync'}</h3>
+
+                <div class="glass-card p-20 mb-20" style="background: var(--bg-secondary); border-color: var(--border-color);">
+                    <h4 style="margin-bottom:12px;">📡 ${t('connection_status') || 'Connection Status'}</h4>
+                    <p id="cloud-status-text" style="color:var(--text-muted); margin-bottom:16px;">${t('check_connection_desc') || 'Click below to verify connection to the cloud database.'}</p>
+                    <button class="btn btn-primary" id="btn-check-cloud" onclick="Settings.checkCloudConnection()">🔄 ${t('test_connection') || 'Test Connection'}</button>
+                </div>
+
+                <div class="grid-2">
+                    <div class="glass-card p-20" style="border-color: var(--border-color);">
+                        <h4 style="margin-bottom:8px;">📤 ${t('force_upload') || 'Force Upload'}</h4>
+                        <p style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">${t('force_upload_desc') || 'Upload all local data to the cloud. Overwrites cloud data.'}</p>
+                        <button class="btn btn-warning" onclick="Settings.forceCloudUpload()">📤 ${t('upload_now') || 'Upload Now'}</button>
+                    </div>
+
+                    <div class="glass-card p-20" style="border-color: var(--border-color);">
+                        <h4 style="margin-bottom:8px;">📥 ${t('force_download') || 'Force Download'}</h4>
+                        <p style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">${t('force_download_desc') || 'Download all data from cloud. Overwrites local data.'}</p>
+                        <button class="btn btn-warning" onclick="Settings.forceCloudDownload()">📥 ${t('download_now') || 'Download Now'}</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+
+    async checkCloudConnection() {
+        const btn = document.getElementById('btn-check-cloud');
+        const statusText = document.getElementById('cloud-status-text');
+
+        btn.disabled = true;
+        btn.innerHTML = `<span class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;"></span> Checking...`;
+        statusText.innerHTML = 'Testing connection...';
+        statusText.style.color = 'var(--text-muted)';
+
+        try {
+            if (!window.dbFirestore) throw new Error("Firebase SDK not loaded");
+
+            // Try to write a timestamp to a special 'connection_test' document
+            await window.dbFirestore.collection('system').doc('connection_test').set({
+                last_test: firebase.firestore.FieldValue.serverTimestamp(),
+                tested_by: Auth.currentUser ? Auth.currentUser.username : 'guest'
+            });
+
+            statusText.innerHTML = `✅ ${t('connection_success') || 'Connected successfully to Firebase Cloud!'}`;
+            statusText.style.color = 'var(--success)';
+            Toast.show('success', 'Connection success', 'success');
+
+        } catch (e) {
+            console.error(e);
+            statusText.innerHTML = `❌ ${t('connection_failed') || 'Connection failed'}: ${e.message}`;
+            statusText.style.color = 'var(--danger)';
+            Toast.show('error', 'Connection failed', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = `🔄 ${t('test_connection') || 'Test Connection'}`;
+        }
+    },
+
+    async forceCloudUpload() {
+        if (!confirm(t('confirm_upload') || 'Are you sure? This will overwrite cloud data with your local data.')) return;
+
+        const loadingToast = Toast.show('info', 'Uploading...', 'info', 10000);
+        try {
+            await db.checkMigration(); // This function already handles uploading everything
+            Toast.show('success', 'Upload completed!', 'success');
+        } catch (e) {
+            console.error(e);
+            Toast.show('error', 'Upload failed: ' + e.message, 'error');
+        }
+        // Remove loading toast if possible or let it expire
+    },
+
+    async forceCloudDownload() {
+        if (!confirm(t('confirm_download') || 'Are you sure? This will overwrite your LOCAL data with cloud data.')) return;
+
+        Toast.show('info', 'Downloading...', 'info', 10000);
+        try {
+            // Re-use restore logic but from cloud
+            const collections = ['products', 'categories', 'users', 'customers', 'sales', 'shifts', 'settings'];
+
+            for (const col of collections) {
+                const snapshot = await window.dbFirestore.collection(col).get();
+                const data = snapshot.docs.map(doc => doc.data());
+                if (data.length > 0) {
+                    db.setCollection(col, data);
+                }
+            }
+
+            Toast.show('success', 'Download completed! Reloading...', 'success');
+            setTimeout(() => location.reload(), 1500);
+        } catch (e) {
+            console.error(e);
+            Toast.show('error', 'Download failed: ' + e.message, 'error');
+        }
     }
 };

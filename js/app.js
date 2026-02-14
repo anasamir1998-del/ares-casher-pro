@@ -242,7 +242,7 @@ const App = {
         setTimeout(() => document.getElementById('login-username').focus(), 300);
     },
 
-    handleLogin() {
+    async handleLogin() {
         const username = document.getElementById('login-username').value.trim();
         const password = document.getElementById('login-password').value.trim();
 
@@ -251,15 +251,29 @@ const App = {
             return;
         }
 
-        const result = Auth.login(username, password);
-        if (result.success) {
-            this.playSound('success');
-            this.onLoginSuccess(result.user);
-        } else {
-            this.playSound('error');
-            Toast.show(t('error'), result.message, 'error');
-            document.getElementById('login-password').value = '';
-            document.getElementById('login-password').focus();
+        // Show loading state?
+        const btn = document.getElementById('login-btn');
+        const originalText = btn.textContent;
+        btn.textContent = '...';
+        btn.disabled = true;
+
+        try {
+            const result = await Auth.login(username, password);
+            if (result.success) {
+                this.playSound('success');
+                this.onLoginSuccess(result.user);
+            } else {
+                this.playSound('error');
+                Toast.show(t('error'), result.message, 'error');
+                document.getElementById('login-password').value = '';
+                document.getElementById('login-password').focus();
+            }
+        } catch (e) {
+            console.error(e);
+            Toast.show(t('error'), 'Login error', 'error');
+        } finally {
+            btn.textContent = originalText;
+            btn.disabled = false;
         }
     },
 
