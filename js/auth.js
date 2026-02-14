@@ -12,7 +12,7 @@ const Auth = {
             'view_reports', 'manage_settings', 'manage_shifts',
             'view_invoices', 'apply_discounts', 'hold_orders',
             'manage_users', 'delete_sales', 'export_data',
-            'view_dashboard_full', 'change_prices'
+            'view_dashboard_full', 'change_prices', 'manage_purchases'
         ],
         'مشرف': [
             'access_pos', 'manage_products', 'manage_customers',
@@ -41,6 +41,7 @@ const Auth = {
         { key: 'view_reports', label: '📈 التقارير', group: 'العمليات' },
         { key: 'view_dashboard_full', label: '📊 لوحة التحكم الكاملة', group: 'العمليات' },
         { key: 'export_data', label: '📤 تصدير البيانات', group: 'البيانات' },
+        { key: 'manage_purchases', label: '🚚 إدارة المشتريات', group: 'الإدارة' },
     ],
 
     login(username, password) {
