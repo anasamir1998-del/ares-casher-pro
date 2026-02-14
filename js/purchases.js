@@ -31,10 +31,11 @@ const Purchases = {
             if (!fromEdit) {
                 this.cart = [];
                 this.editingPurchaseId = null;
-                // Also reset form inputs if they exist
+                // Also reset form inputs if they exist (though renderNewPurchase will recreate them)
                 const supplierSelect = document.getElementById('pur-supplier');
                 if (supplierSelect) supplierSelect.value = "";
-                document.getElementById('pur-search').value = "";
+                const searchInput = document.getElementById('pur-search');
+                if (searchInput) searchInput.value = "";
             }
         } else {
             this.editingPurchaseId = null;
@@ -483,7 +484,6 @@ const Purchases = {
                             <th>${t('supplier')}</th>
                             <th>${t('items_count')}</th>
                             <th>${t('total')}</th>
-                            <th>${t('status')}</th>
                             <th>${t('actions')}</th>
                         </tr>
                     </thead>
@@ -498,7 +498,6 @@ const Purchases = {
                                 <td>${sup ? Utils.escapeHTML(sup.name) : '<span style="color:var(--text-muted)">—</span>'}</td>
                                 <td><span class="badge badge-info">${p.itemsCount}</span></td>
                                 <td style="font-family:Inter; font-weight:700;">${Utils.formatSAR(p.total)}</td>
-                                <td><span class="badge badge-success">${t('tax_invoice') || 'Tax Invoice'}</span></td>
                                 <td>
                                     <button class="btn btn-ghost btn-sm" onclick="Purchases.viewPurchase('${p.id}')" title="${t('view')}">👁️</button>
                                     ${isAdmin ? `
