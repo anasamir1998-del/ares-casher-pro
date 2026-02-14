@@ -21,18 +21,23 @@ const Purchases = {
 
     editingPurchaseId: null,
 
-    switchTab(btn, tab) {
+    switchTab(btn, tab, fromEdit = false) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+        if (btn) btn.classList.add('active');
         const container = document.getElementById('purchases-content');
 
         if (tab === 'new') {
-            // Reset if switching manually (unless triggered by edit)
-            if (!this.editingPurchaseId) {
+            // Reset if NOT coming from Edit (i.e. User clicked "New Purchase" tab)
+            if (!fromEdit) {
                 this.cart = [];
+                this.editingPurchaseId = null;
+                // Also reset form inputs if they exist
+                const supplierSelect = document.getElementById('pur-supplier');
+                if (supplierSelect) supplierSelect.value = "";
+                document.getElementById('pur-search').value = "";
             }
         } else {
-            this.editingPurchaseId = null; // Clear edit mode when leaving tab
+            this.editingPurchaseId = null;
         }
 
         switch (tab) {
@@ -139,7 +144,7 @@ const Purchases = {
     cart: [],
 
     renderNewPurchase() {
-        this.cart = []; // Reset cart
+        // this.cart = []; // REMOVED: Managed by switchTab now
         const suppliers = db.getCollection('suppliers');
 
         return `
@@ -404,7 +409,7 @@ const Purchases = {
 
         // Switch to New Purchase tab
         const tabBtn = document.querySelectorAll('.tab-btn')[1];
-        this.switchTab(tabBtn, 'new');
+        this.switchTab(tabBtn, 'new', true); // true = fromEdit
 
         // Populate form (delay slightly to ensure DOM is ready)
         setTimeout(() => {
@@ -423,6 +428,41 @@ const Purchases = {
             this.renderCart();
             Toast.show(t('info'), `${t('edit')}`, 'info');
         }, 50);
+    },
+
+    viewPurchase(id) {
+        const p = db.getById('purchases', id);
+        if (!p) return;
+        const supplier = db.getById('suppliers', p.supplierId);
+
+        Modal.show(t('details') + ': ' + (p.date || Utils.formatDateTime(p.createdAt)), `
+            <div style="margin-bottom:16px;">
+                <strong>${t('supplier')}:</strong> ${supplier ? supplier.name : '—'}<br>
+                <strong>${t('date')}:</strong> ${p.date || '—'}<br>
+                <strong>${t('items_count')}:</strong> ${p.itemsCount}<br>
+                <strong>${t('total_cost')}:</strong> ${Utils.formatSAR(p.total)}
+            </div>
+            <table class="data-table">
+                <thead>
+                   <tr>
+                       <th>${t('product')}</th>
+                       <th>${t('quantity')}</th>
+                       <th>${t('cost')}</th>
+                       <th>${t('total')}</th>
+                   </tr>
+                </thead>
+                <tbody>
+                    ${p.items.map(item => `
+                        <tr>
+                            <td>${item.name}</td>
+                            <td>${item.qty}</td>
+                            <td>${Utils.formatSAR(item.cost)}</td>
+                            <td>${Utils.formatSAR(item.qty * item.cost)}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `, `<button class="btn btn-primary" onclick="Modal.hide()">${t('close')}</button>`);
     },
 
     /* ── History Logic ── */
@@ -452,13 +492,11 @@ const Purchases = {
                                 <td>${sup ? Utils.escapeHTML(sup.name) : '—'}</td>
                                 <td>${p.itemsCount}</td>
                                 <td style="font-family:Inter; font-weight:700;">${Utils.formatSAR(p.total)}</td>
-                                <td>
                                     ${isAdmin ? `
                                     <button class="btn btn-ghost btn-sm" onclick="Purchases.editPurchase('${p.id}')">✏️</button>
                                     <button class="btn btn-ghost btn-sm" onclick="Purchases.deletePurchase('${p.id}')" style="color:var(--danger)">🗑️</button>
-                                    ` : `
-                                    <button class="btn btn-ghost btn-sm disabled">👁️</button>
-                                    `}
+                                    ` : ''}
+                                    <button class="btn btn-ghost btn-sm" onclick="Purchases.viewPurchase('${p.id}')">👁️</button>
                                 </td>
                             </tr>`;
         }).join('')}
