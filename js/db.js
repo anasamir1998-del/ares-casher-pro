@@ -111,6 +111,16 @@ class Database {
         return `INV-${y}${m}-${String(counter).padStart(5, '0')}`;
     }
 
+    // Get next purchase number
+    getNextPurchaseNumber() {
+        let counter = parseInt(this.getSetting('purchase_counter', '0')) + 1;
+        this.setSetting('purchase_counter', counter.toString());
+        const date = new Date();
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        return `PUR-${y}${m}-${String(counter).padStart(5, '0')}`;
+    }
+
     // Initialize default data
     initDefaults() {
         // Initialize new collections (Suppliers & Purchases) if missing

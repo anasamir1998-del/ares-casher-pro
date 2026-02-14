@@ -348,10 +348,12 @@ const Purchases = {
 
         if (this.editingPurchaseId) {
             // Update existing record
+            // Preserve existing purchaseNumber
             db.update('purchases', this.editingPurchaseId, purchase);
             Toast.show(t('success'), t('updated_successfully') || 'Updated Successfully', 'success');
         } else {
             // Insert new record
+            purchase.purchaseNumber = db.getNextPurchaseNumber();
             db.insert('purchases', purchase);
             Toast.show(t('success'), t('purchase_saved'), 'success');
         }
@@ -432,7 +434,7 @@ const Purchases = {
         if (!p) return;
         const supplier = db.getById('suppliers', p.supplierId);
 
-        Modal.show(t('details') + ': ' + (p.date || Utils.formatDateTime(p.createdAt)), `
+        Modal.show((p.purchaseNumber || t('details')) + ' | ' + (p.date || Utils.formatDateTime(p.createdAt)), `
             <div style="margin-bottom:16px;">
                 <strong>${t('supplier')}:</strong> ${supplier ? supplier.name : '—'}<br>
                 <strong>${t('date')}:</strong> ${p.date || '—'}<br>
@@ -472,6 +474,7 @@ const Purchases = {
                 <table class="data-table">
                     <thead>
                         <tr>
+                            <th>#</th>
                             <th>${t('date')}</th>
                             <th>${t('supplier_name')}</th>
                             <th>${t('items_count')}</th>
@@ -485,6 +488,7 @@ const Purchases = {
             const isAdmin = Auth.isAdmin();
             return `
                             <tr>
+                                <td style="font-family:Inter; font-weight:700;">${p.purchaseNumber || '—'}</td>
                                 <td style="font-family:Inter;">${p.date || Utils.formatDateTime(p.createdAt)}</td>
                                 <td>${sup ? Utils.escapeHTML(sup.name) : '—'}</td>
                                 <td>${p.itemsCount}</td>
