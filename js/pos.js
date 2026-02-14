@@ -7,7 +7,10 @@ const POS = {
     selectedCategory: null,
     searchQuery: '',
     discountType: 'percent', // 'percent' or 'fixed'
+    searchQuery: '',
+    discountType: 'percent', // 'percent' or 'fixed'
     discountValue: 0,
+    editingInvoice: null, // Track if we are editing an invoice
 
     render() {
         const content = document.getElementById('content-body');
@@ -46,7 +49,10 @@ const POS = {
                 <div class="pos-cart">
                     <div class="cart-header">
                         <h3>🛒 ${t('cart')} <span class="cart-count" id="cart-count">${this.cart.length}</span></h3>
-                        <button class="btn btn-ghost btn-sm" onclick="POS.clearCart()" title="${t('clear_cart')}">🗑️</button>
+                        <div class="flex gap-4">
+                            ${this.editingInvoice ? `<span class="badge badge-warning" style="font-size:12px;">✏️ ${t('edit')} (${this.editingInvoice.invoiceNumber})</span>` : ''}
+                            <button class="btn btn-ghost btn-sm" onclick="POS.clearCart()" title="${t('clear_cart')}">🗑️</button>
+                        </div>
                     </div>
                     <div class="cart-items" id="cart-items">
                         ${this.renderCartItems()}
@@ -226,10 +232,17 @@ const POS = {
     },
 
     clearCart() {
-        if (this.cart.length === 0) return;
+        if (this.cart.length === 0 && !this.editingInvoice) return;
+
+        if (this.editingInvoice) {
+            if (!confirm(t('confirm') + '?')) return;
+        }
+
         this.cart = [];
         this.discountValue = 0;
+        this.editingInvoice = null;
         this.refreshCart();
+        App.playSound('beep');
     },
 
     refreshCart() {
@@ -328,6 +341,18 @@ const POS = {
         }
     },
 
+    loadInvoice(invoice) {
+        this.clearCart();
+        this.cart = invoice.items.map(item => ({ ...item })); // Deep copy items
+        this.discountType = invoice.discountType || 'percent';
+        this.discountValue = invoice.discountValue || 0;
+        this.editingInvoice = invoice;
+
+        App.navigate('pos');
+        this.refreshCart();
+        Toast.show(t('info'), `${t('edit')}: ${invoice.invoiceNumber}`, 'info');
+    },
+
     checkout() {
         if (this.cart.length === 0) {
             Toast.show(t('warning'), t('cart_empty_checkout'), 'warning');
@@ -423,10 +448,36 @@ const POS = {
         }
 
         // Generate invoice number
-        const invoiceNumber = db.getNextInvoiceNumber();
+        let invoiceNumber;
+        let saleId = undefined;
+        let createdAt = undefined;
+
+        if (this.editingInvoice) {
+            // If editing, preserve original ID, Number, and Date
+            invoiceNumber = this.editingInvoice.invoiceNumber;
+            saleId = this.editingInvoice.id;
+            createdAt = this.editingInvoice.createdAt;
+
+            // CRITICAL: Restore Stock of ORIGINAL items before deducting new ones
+            this.editingInvoice.items.forEach(item => {
+                const product = db.getById('products', item.productId);
+                if (product && product.stock !== undefined) {
+                    db.update('products', item.productId, {
+                        stock: Number(product.stock) + Number(item.qty)
+                    });
+                }
+            });
+
+            // Remove old invoice (we will insert the updated one)
+            db.removeById('sales', this.editingInvoice.id);
+        } else {
+            invoiceNumber = db.getNextInvoiceNumber();
+        }
 
         // Create sale record
         const sale = db.insert('sales', {
+            id: saleId, // Will be generated if undefined
+            createdAt: createdAt, // Will be set to now if undefined
             invoiceNumber,
             items: this.cart.map(item => ({
                 productId: item.productId,
@@ -466,8 +517,10 @@ const POS = {
         });
 
         // Clear cart
+        // Clear cart
         this.cart = [];
         this.discountValue = 0;
+        this.editingInvoice = null;
 
         Modal.hide();
         App.playSound('checkout');

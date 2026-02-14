@@ -83,11 +83,44 @@ const Invoices = {
                 <td><span class="badge ${isSimplified ? 'badge-accent' : 'badge-success'}">${isSimplified ? t('simplified') : t('full_invoice')}</span></td>
                 <td>
                     <button class="btn btn-ghost btn-sm" onclick="Invoices.viewInvoice('${s.id}')" title="${t('view')}">👁️</button>
+                    ${isAdmin ? `
+                    <button class="btn btn-ghost btn-sm" onclick="Invoices.editInvoice('${s.id}')" title="${t('edit')}">✏️</button>
+                    <button class="btn btn-ghost btn-sm" onclick="Invoices.deleteInvoice('${s.id}')" title="${t('delete')}" style="color:var(--danger)">🗑️</button>
+                    ` : ''}
                     <button class="btn btn-ghost btn-sm" onclick="Invoices.printInvoice('${s.id}')" title="${t('print_a4')}">🖨️</button>
                     <button class="btn btn-ghost btn-sm" onclick="Invoices.printReceipt('${s.id}')" title="${t('print_receipt')}">🧾</button>
                 </td>
             </tr>`;
         }).join('');
+    },
+
+    deleteInvoice(id) {
+        if (!confirm(t('delete') + '?')) return;
+
+        const sale = db.getById('sales', id);
+        if (sale) {
+            // Restore stock
+            sale.items.forEach(item => {
+                const product = db.getById('products', item.productId);
+                if (product && product.stock !== undefined) {
+                    db.update('products', item.productId, {
+                        stock: Number(product.stock) + Number(item.qty)
+                    });
+                }
+            });
+
+            db.removeById('sales', id);
+            this.render();
+            Toast.show(t('success'), t('operation_done'), 'success');
+        }
+    },
+
+    editInvoice(id) {
+        const sale = db.getById('sales', id);
+        if (sale) {
+            if (POS.cart.length > 0 && !confirm(t('confirm') + ' (' + t('cart') + ')')) return;
+            POS.loadInvoice(sale);
+        }
     },
 
     filter(query) {
