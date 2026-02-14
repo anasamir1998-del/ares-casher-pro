@@ -206,6 +206,7 @@ const I18n = {
         product_stock: { ar: 'الكمية في المخزون', en: 'Stock Quantity', ur: 'اسٹاک مقدار' },
         product_barcode: { ar: 'الباركود', en: 'Barcode', ur: 'بارکوڈ' },
         product_image: { ar: 'صورة المنتج', en: 'Product Image', ur: 'مصنوع کی تصویر' },
+        show_in_pos: { ar: 'إظهار في شاشة البيع', en: 'Show in POS', ur: 'پوائنٹ آف سیل میں دکھائیں' },
         upload_image: { ar: 'رفع صورة', en: 'Upload Image', ur: 'تصویر اپ لوڈ' },
         select_emoji: { ar: 'اختر رمز', en: 'Select Emoji', ur: 'ایموجی منتخب کریں' },
         min_stock: { ar: 'حد أدنى للمخزون', en: 'Min Stock Alert', ur: 'کم سے کم اسٹاک الرٹ' },

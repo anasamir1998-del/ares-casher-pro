@@ -93,6 +93,7 @@ const Products = {
                 </td>
                 <td style="font-family:Inter; font-size:12px; color:var(--text-muted);">${p.barcode || '—'}</td>
                 <td>
+                    ${!p.showInPos === false ? '' : '<span class="badge badge-warning" style="font-size:10px;">👁️‍🗨️ Hidden</span>'}
                     <span class="badge ${p.active !== false ? 'badge-success' : 'badge-danger'}">${p.active !== false ? t('active') : t('disabled')}</span>
                 </td>
                 <td>
@@ -193,6 +194,12 @@ const Products = {
                     </select>
                 </div>
             </div>
+            <div class="form-group mb-12">
+                <label class="flex items-center gap-8" style="cursor:pointer; user-select:none;">
+                    <input type="checkbox" id="p-show-pos" ${product?.showInPos !== false ? 'checked' : ''} style="width:18px; height:18px;">
+                    <span>${t('show_in_pos')}</span>
+                </label>
+            </div>
             <div class="form-group">
                 <label>${t('notes')}</label>
                 <textarea class="form-control" id="p-notes" rows="2" placeholder="${t('optional_notes')}">${product?.notes || ''}</textarea>
@@ -279,6 +286,7 @@ const Products = {
         const minStock = parseInt(document.getElementById('p-min-stock').value) || 5;
         const barcode = document.getElementById('p-barcode').value.trim();
         const active = document.getElementById('p-active').value === 'true';
+        const showInPos = document.getElementById('p-show-pos').checked;
         const notes = document.getElementById('p-notes').value.trim();
 
         if (!name || isNaN(price) || price < 0) {
@@ -290,7 +298,7 @@ const Products = {
             name, price, categoryId: categoryId || null, type,
             stock: type === 'service' ? 0 : stock,
             minStock: type === 'service' ? 0 : minStock,
-            barcode, active, notes,
+            barcode, active, showInPos, notes,
             image: this.selectedImage || null,
             emoji: this.selectedEmoji || null
         };

@@ -87,7 +87,7 @@ const POS = {
     },
 
     renderProducts() {
-        let products = db.getCollection('products').filter(p => p.active !== false);
+        let products = db.getCollection('products').filter(p => p.active !== false && p.showInPos !== false);
 
         // Filter by category
         if (this.selectedCategory) {
