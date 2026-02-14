@@ -19,10 +19,21 @@ const Purchases = {
         `;
     },
 
+    editingPurchaseId: null,
+
     switchTab(btn, tab) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         const container = document.getElementById('purchases-content');
+
+        if (tab === 'new') {
+            // Reset if switching manually (unless triggered by edit)
+            if (!this.editingPurchaseId) {
+                this.cart = [];
+            }
+        } else {
+            this.editingPurchaseId = null; // Clear edit mode when leaving tab
+        }
 
         switch (tab) {
             case 'history': container.innerHTML = this.renderHistory(); break;
@@ -302,6 +313,22 @@ const Purchases = {
             return;
         }
 
+        if (this.editingPurchaseId) {
+            // EDIT MODE
+            const oldPurchase = db.getById('purchases', this.editingPurchaseId);
+            if (oldPurchase) {
+                // 1. Reverse OLD stock addition (Subtract old qty)
+                oldPurchase.items.forEach(item => {
+                    const product = db.getById('products', item.productId);
+                    if (product) {
+                        db.update('products', item.productId, {
+                            stock: Number(product.stock || 0) - Number(item.qty)
+                        });
+                    }
+                });
+            }
+        }
+
         const total = this.cart.reduce((sum, item) => sum + (item.qty * item.cost), 0);
 
         // 1. Save Purchase Record
@@ -312,7 +339,14 @@ const Purchases = {
             total,
             itemsCount: this.cart.length
         };
-        db.insert('purchases', purchase);
+
+        if (this.editingPurchaseId) {
+            // Update existing record
+            db.update('purchases', this.editingPurchaseId, purchase);
+        } else {
+            // Insert new record
+            db.insert('purchases', purchase);
+        }
 
         // 2. Update Stock & Cost Price
         this.cart.forEach(item => {
@@ -325,7 +359,7 @@ const Purchases = {
                 const currentStock = parseFloat(product.stock || 0);
                 const newStock = currentStock + item.qty;
 
-                // Update cost price (last cost or average? let's stick to last cost for simplicity or just update it)
+                // Update cost price
                 db.update('products', item.productId, {
                     stock: newStock,
                     costPrice: item.cost
@@ -335,6 +369,60 @@ const Purchases = {
 
         Toast.show(t('success'), t('purchase_saved'), 'success');
         this.switchTab(document.querySelectorAll('.tab-btn')[0], 'history');
+        this.editingPurchaseId = null;
+        Toast.show(t('success'), t('purchase_saved'), 'success');
+        this.switchTab(document.querySelectorAll('.tab-btn')[0], 'history');
+    },
+
+    deletePurchase(id) {
+        if (!confirm(t('confirm_delete') || 'Delete?')) return;
+
+        const purchase = db.getById('purchases', id);
+        if (purchase) {
+            // Reverse Stock (Subtract)
+            purchase.items.forEach(item => {
+                const product = db.getById('products', item.productId);
+                if (product) {
+                    db.update('products', item.productId, {
+                        stock: Number(product.stock || 0) - Number(item.qty)
+                    });
+                }
+            });
+
+            db.delete('purchases', id);
+            this.switchTab(document.querySelectorAll('.tab-btn')[0], 'history');
+            Toast.show(t('success'), t('operation_done'), 'success');
+        }
+    },
+
+    editPurchase(id) {
+        const purchase = db.getById('purchases', id);
+        if (!purchase) return;
+
+        this.editingPurchaseId = id;
+        this.cart = purchase.items.map(i => ({ ...i })); // Deep copy
+
+        // Switch to New Purchase tab
+        const tabBtn = document.querySelectorAll('.tab-btn')[1];
+        this.switchTab(tabBtn, 'new');
+
+        // Populate form (delay slightly to ensure DOM is ready)
+        setTimeout(() => {
+            const supplierSelect = document.getElementById('pur-supplier');
+            const dateInput = document.getElementById('pur-date');
+
+            if (supplierSelect) supplierSelect.value = purchase.supplierId;
+            if (dateInput) {
+                if (dateInput._flatpickr) {
+                    dateInput._flatpickr.setDate(purchase.date);
+                } else {
+                    dateInput.value = purchase.date;
+                }
+            }
+
+            this.renderCart();
+            Toast.show(t('info'), `${t('edit')}`, 'info');
+        }, 50);
     },
 
     /* ── History Logic ── */
@@ -357,6 +445,7 @@ const Purchases = {
                     <tbody>
                         ${purchases.map(p => {
             const sup = suppliers.find(s => s.id === p.supplierId);
+            const isAdmin = Auth.isAdmin();
             return `
                             <tr>
                                 <td style="font-family:Inter;">${p.date || Utils.formatDateTime(p.createdAt)}</td>
@@ -364,8 +453,12 @@ const Purchases = {
                                 <td>${p.itemsCount}</td>
                                 <td style="font-family:Inter; font-weight:700;">${Utils.formatSAR(p.total)}</td>
                                 <td>
-                                    <!-- View logic can be added later -->
+                                    ${isAdmin ? `
+                                    <button class="btn btn-ghost btn-sm" onclick="Purchases.editPurchase('${p.id}')">✏️</button>
+                                    <button class="btn btn-ghost btn-sm" onclick="Purchases.deletePurchase('${p.id}')" style="color:var(--danger)">🗑️</button>
+                                    ` : `
                                     <button class="btn btn-ghost btn-sm disabled">👁️</button>
+                                    `}
                                 </td>
                             </tr>`;
         }).join('')}
