@@ -177,10 +177,15 @@ const Receipt = {
                         <span>${t('subtotal')}</span>
                         <span>${Number(subtotal).toFixed(2)} ${currency}</span>
                     </div>
+                    ${vatAmount > 0 ? `
                     <div class="row">
                         <span>${t('vat')} (${vatRate}%)</span>
                         <span>${Number(vatAmount).toFixed(2)} ${currency}</span>
-                    </div>
+                    </div>` : `
+                    <div class="row">
+                        <span>${t('vat')}</span>
+                        <span>0.00 ${currency} (${t('tax_exempt') || 'Tax Exempt'})</span>
+                    </div>`}
                     ${showDiscount && sale.discount ? `
                     <div class="row">
                         <span>${t('discount')}</span>

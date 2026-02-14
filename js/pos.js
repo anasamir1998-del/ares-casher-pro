@@ -10,6 +10,7 @@ const POS = {
     searchQuery: '',
     discountType: 'percent', // 'percent' or 'fixed'
     discountValue: 0,
+    vatEnabled: true, // Default to true
     editingInvoice: null, // Track if we are editing an invoice
 
     render() {
@@ -152,7 +153,7 @@ const POS = {
         const subtotal = this.getSubtotal();
         const discount = this.getDiscountAmount(subtotal);
         const afterDiscount = subtotal - discount;
-        const vatRate = parseFloat(db.getSetting('vat_rate', '15')) / 100;
+        const vatRate = this.vatEnabled ? parseFloat(db.getSetting('vat_rate', '15')) / 100 : 0;
         const vatAmount = afterDiscount * vatRate;
         const total = afterDiscount + vatAmount;
 
@@ -167,7 +168,7 @@ const POS = {
                 <span class="amount">- ${Utils.formatSAR(discount)}</span>
             </div>
             ` : ''}
-            <div class="cart-summary-row">
+            <div class="cart-summary-row" style="${!this.vatEnabled ? 'text-decoration: line-through; opacity: 0.5;' : ''}">
                 <span>${t('vat')} (${(vatRate * 100).toFixed(0)}%)</span>
                 <span class="amount">${Utils.formatSAR(vatAmount)}</span>
             </div>
@@ -403,6 +404,10 @@ const POS = {
                 <input type="number" class="form-control" id="cash-amount" value="${total.toFixed(2)}" step="0.01" oninput="POS.updateChange()">
                 <div id="change-display" style="margin-top:8px; font-weight:600; color: var(--success);"></div>
             </div>
+            <div class="form-group" style="display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" id="vat-toggle" ${this.vatEnabled ? 'checked' : ''} onchange="POS.toggleVAT(this.checked)" style="width:20px; height:20px;">
+                <label for="vat-toggle" style="margin:0; cursor:pointer;">${t('apply_vat') || 'تطبيق الضريبة'}</label>
+            </div>
         `, `
             <button class="btn btn-success btn-lg" onclick="POS.completeSale()">✅ ${t('complete_sale')}</button>
             <button class="btn btn-ghost" onclick="Modal.hide()">${t('cancel')}</button>
@@ -423,11 +428,29 @@ const POS = {
         }
     },
 
+    toggleVAT(enabled) {
+        this.vatEnabled = enabled;
+        // Refresh Checkout Modal Total
+        const total = this.getTotal();
+        const display = document.querySelector('.glass-card .text-gradient');
+        if (display) display.textContent = Utils.formatSAR(total);
+
+        // Update cash input default value if it hasn't been manually changed (simple check)
+        const cashInput = document.getElementById('cash-amount');
+        if (cashInput) {
+            cashInput.value = total.toFixed(2);
+            this.updateChange();
+        }
+
+        // Also refresh background summary
+        this.refreshCart();
+    },
+
     getTotal() {
         const subtotal = this.getSubtotal();
         const discount = this.getDiscountAmount(subtotal);
         const afterDiscount = subtotal - discount;
-        const vatRate = parseFloat(db.getSetting('vat_rate', '15')) / 100;
+        const vatRate = this.vatEnabled ? parseFloat(db.getSetting('vat_rate', '15')) / 100 : 0;
         const vatAmount = afterDiscount * vatRate;
         return afterDiscount + vatAmount;
     },
@@ -504,8 +527,9 @@ const POS = {
             discountType: this.discountType,
             discountValue: this.discountValue,
             afterDiscount,
-            vatRate: vatRate * 100,
-            vatAmount,
+            vatEnabled: this.vatEnabled,
+            vatRate: this.vatEnabled ? vatRate * 100 : 0,
+            vatAmount: this.vatEnabled ? vatAmount : 0,
             total,
             paymentMethod,
             customerId: customerId || null,

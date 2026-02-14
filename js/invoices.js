@@ -185,7 +185,9 @@ const Invoices = {
             <div class="glass-card p-20">
                 <div class="flex justify-between mb-4"><span>${t('subtotal')}:</span><span style="font-family:Inter;">${Utils.formatSAR(sale.subtotal)}</span></div>
                 ${sale.discount ? `<div class="flex justify-between mb-4"><span>${t('discount')}:</span><span style="color:var(--danger); font-family:Inter;">-${Utils.formatSAR(sale.discount)}</span></div>` : ''}
-                <div class="flex justify-between mb-4"><span>${t('vat')} (${sale.vatRate || 15}%):</span><span style="font-family:Inter; color:var(--warning);">${Utils.formatSAR(sale.vatAmount)}</span></div>
+                ${sale.vatAmount > 0 ?
+                `<div class="flex justify-between mb-4"><span>${t('vat')} (${sale.vatRate || 15}%):</span><span style="font-family:Inter; color:var(--warning);">${Utils.formatSAR(sale.vatAmount)}</span></div>` :
+                `<div class="flex justify-between mb-4"><span>${t('vat')}:</span><span style="font-family:Inter; color:var(--text-muted);">0.00 (${t('tax_exempt') || 'معفى من الضريبة'})</span></div>`}
                 <div class="flex justify-between" style="font-size:18px; font-weight:800; padding-top:8px; border-top:1px solid var(--border-color);">
                     <span>${t('grand_total')}</span>
                     <span class="text-gradient" style="font-family:Inter;">${Utils.formatSAR(sale.total)}</span>
@@ -298,7 +300,9 @@ const Invoices = {
                 <table class="totals">
                     <tr><td>${t('subtotal')}:</td><td style="text-align:${dir === 'rtl' ? 'left' : 'right'}; font-family:Inter;">${Utils.formatSAR(sale.subtotal)}</td></tr>
                     ${sale.discount ? `<tr><td>${t('discount')}:</td><td style="text-align:${dir === 'rtl' ? 'left' : 'right'}; font-family:Inter; color:red;">-${Utils.formatSAR(sale.discount)}</td></tr>` : ''}
-                    <tr><td>${t('vat')} (${sale.vatRate || 15}%):</td><td style="text-align:${dir === 'rtl' ? 'left' : 'right'}; font-family:Inter;">${Utils.formatSAR(sale.vatAmount)}</td></tr>
+                    ${sale.vatAmount > 0 ?
+                `<tr><td>${t('vat')} (${sale.vatRate || 15}%):</td><td style="text-align:${dir === 'rtl' ? 'left' : 'right'}; font-family:Inter;">${Utils.formatSAR(sale.vatAmount)}</td></tr>` :
+                `<tr><td>${t('vat')}:</td><td style="text-align:${dir === 'rtl' ? 'left' : 'right'}; font-family:Inter;">0.00 (${t('tax_exempt') || 'Exempt'})</td></tr>`}
                     <tr class="grand"><td><strong>${t('grand_total')}:</strong></td><td style="text-align:${dir === 'rtl' ? 'left' : 'right'}; font-family:Inter;"><strong>${Utils.formatSAR(sale.total)}</strong></td></tr>
                 </table>
 
@@ -456,7 +460,9 @@ const Invoices = {
 
                 <div class="total-row"><span>${t('subtotal')}:</span><span>${Utils.formatSAR(sale.subtotal)}</span></div>
                 ${showDiscount && sale.discount ? `<div class="total-row"><span>${t('discount')}:</span><span>-${Utils.formatSAR(sale.discount)}</span></div>` : ''}
-                <div class="total-row"><span>${t('vat')} (${sale.vatRate || 15}%):</span><span>${Utils.formatSAR(sale.vatAmount)}</span></div>
+                ${sale.vatAmount > 0 ?
+                `<div class="total-row"><span>${t('vat')} (${sale.vatRate || 15}%):</span><span>${Utils.formatSAR(sale.vatAmount)}</span></div>` :
+                `<div class="total-row"><span>${t('vat')}:</span><span>0.00 (${t('tax_exempt') || 'Exempt'})</span></div>`}
                 <div class="total-row grand-total"><span>${t('grand_total')}:</span><span>${Utils.formatSAR(sale.total)}</span></div>
                 
                 ${showPaymentMethod && sale.paymentMethod ? `<div class="total-row"><span>${t('payment_method')}:</span><span>${sale.paymentMethod === 'نقدي' ? t('cash_sales') : sale.paymentMethod === 'بطاقة' ? t('card_sales') : sale.paymentMethod === 'تحويل' ? t('transfer_sales') : sale.paymentMethod}</span></div>` : ''}
