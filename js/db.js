@@ -26,14 +26,35 @@ class Database {
             const settingsRef = window.dbFirestore.collection('settings');
             const snapshot = await settingsRef.limit(1).get();
 
-            if (snapshot.empty) {
+            // Case 1: Cloud is empty, Local has data -> Upload to Cloud
+            if (snapshot.empty && this.getCollection('products').length > 0) {
                 console.log("Firestore is empty. Uploading local data...");
                 await this.uploadAllToCloud();
                 if (typeof Toast !== 'undefined') Toast.show('☁️', 'تم رفع البيانات للسحابة بنجاح', 'success');
             }
+            // Case 2: Local is mostly empty, Cloud has data -> Download from Cloud
+            else if (!snapshot.empty && this.getCollection('products').length === 0) {
+                console.log("Local is empty. Downloading from Cloud...");
+                if (typeof Toast !== 'undefined') Toast.show('☁️', 'جاري تحميل البيانات من السحابة...', 'info');
+                await this.downloadAllFromCloud();
+            }
         } catch (e) {
             console.error("Migration check failed:", e);
         }
+    }
+
+    // Download everything from Firestore
+    async downloadAllFromCloud() {
+        const collections = ['products', 'categories', 'customers', 'users', 'settings', 'shifts', 'purchases'];
+        for (const col of collections) {
+            const snapshot = await window.dbFirestore.collection(col).get();
+            const data = snapshot.docs.map(doc => doc.data());
+            if (data.length > 0) {
+                this.setCollection(col, data, true);
+            }
+        }
+        console.log("Download complete");
+        window.location.reload(); // Reload to reflect changes
     }
 
     // Upload everything to Firestore
@@ -98,11 +119,10 @@ class Database {
                     // Update localStorage silently without triggering another upload
                     this.setCollection(colName, localData, true);
 
-                    // Specific UI updates based on collection
-                    if (colName === 'products' && window.Products) {
-                        // Refresh products valid if on products screen? 
-                        // For now, let's just log. Real-time UI updates might require more event hooks.
-                    }
+                    // Notify App
+                    window.dispatchEvent(new CustomEvent('ares-data-update', {
+                        detail: { collection: colName }
+                    }));
                 }
             });
         });

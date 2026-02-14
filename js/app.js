@@ -35,6 +35,7 @@ const App = {
         // Apply shop name/branding LAST — after all UI is set up
         console.log('[App.init] Calling applyBranding...');
         this.applyBranding();
+        this.setupRealtimeUpdates();
         console.log('[App.init] Done.');
     },
 
@@ -57,6 +58,28 @@ const App = {
                 Settings.applyShopName();
             }
         }, 500);
+    },
+
+    /* ── Real-time Updates ── */
+    setupRealtimeUpdates() {
+        window.addEventListener('ares-data-update', (e) => {
+            const col = e.detail.collection;
+            console.log(`[Data Update] Collection changed: ${col}`);
+
+            // If we are on a screen that displays this data, refresh it
+            if (this.currentScreen === 'pos' && (col === 'products' || col === 'categories')) {
+                POS.render();
+            } else if (this.currentScreen === 'products' && (col === 'products' || col === 'categories')) {
+                Products.render();
+            } else if (this.currentScreen === 'dashboard' && col === 'sales') {
+                Dashboard.render();
+            } else if (this.currentScreen === 'customers' && col === 'customers') {
+                Customers.render();
+            } else if (this.currentScreen === 'invoices' && col === 'sales') {
+                Invoices.render();
+            }
+            // Toast.show('🔄', 'Data updated from cloud', 'info', 1000);
+        });
     },
 
     /* ── Theme Management ── */
