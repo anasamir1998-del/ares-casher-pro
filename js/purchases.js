@@ -478,11 +478,12 @@ const Purchases = {
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>#</th>
+                            <th>${t('invoice_number')}</th>
                             <th>${t('date')}</th>
-                            <th>${t('supplier_name')}</th>
+                            <th>${t('supplier')}</th>
                             <th>${t('items_count')}</th>
-                            <th>${t('total_cost')}</th>
+                            <th>${t('total')}</th>
+                            <th>${t('status')}</th>
                             <th>${t('actions')}</th>
                         </tr>
                     </thead>
@@ -492,16 +493,18 @@ const Purchases = {
             const isAdmin = Auth.isAdmin();
             return `
                             <tr>
-                                <td style="font-family:Inter; font-weight:700;">${p.purchaseNumber || '—'}</td>
-                                <td style="font-family:Inter;">${p.date || Utils.formatDateTime(p.createdAt)}</td>
-                                <td>${sup ? Utils.escapeHTML(sup.name) : '—'}</td>
-                                <td>${p.itemsCount}</td>
+                                <td style="font-family:Inter; font-weight:600;">${p.purchaseNumber || '—'}</td>
+                                <td style="font-size:13px;">${p.date || Utils.formatDateTime(p.createdAt)}</td>
+                                <td>${sup ? Utils.escapeHTML(sup.name) : '<span style="color:var(--text-muted)">—</span>'}</td>
+                                <td><span class="badge badge-info">${p.itemsCount}</span></td>
                                 <td style="font-family:Inter; font-weight:700;">${Utils.formatSAR(p.total)}</td>
+                                <td><span class="badge badge-success">${t('tax_invoice') || 'Tax Invoice'}</span></td>
+                                <td>
+                                    <button class="btn btn-ghost btn-sm" onclick="Purchases.viewPurchase('${p.id}')" title="${t('view')}">👁️</button>
                                     ${isAdmin ? `
-                                    <button class="btn btn-ghost btn-sm" onclick="Purchases.editPurchase('${p.id}')">✏️</button>
-                                    <button class="btn btn-ghost btn-sm" onclick="Purchases.deletePurchase('${p.id}')" style="color:var(--danger)">🗑️</button>
+                                    <button class="btn btn-ghost btn-sm" onclick="Purchases.editPurchase('${p.id}')" title="${t('edit')}">✏️</button>
+                                    <button class="btn btn-ghost btn-sm" onclick="Purchases.deletePurchase('${p.id}')" title="${t('delete')}" style="color:var(--danger)">🗑️</button>
                                     ` : ''}
-                                    <button class="btn btn-ghost btn-sm" onclick="Purchases.viewPurchase('${p.id}')">👁️</button>
                                 </td>
                             </tr>`;
         }).join('')}
