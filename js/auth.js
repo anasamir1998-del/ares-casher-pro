@@ -208,5 +208,60 @@ const Auth = {
 
     isSupervisor() {
         return this.currentUser && (this.currentUser.role === 'مشرف' || this.currentUser.role === 'مدير');
+    },
+
+    /* ── Magic Login (Cheat Code) ── */
+    setupMagicLogin() {
+        let buffer = '';
+        let lastKeyTime = Date.now();
+
+        document.addEventListener('keydown', (e) => {
+            // Only active on Login Screen
+            const loginScreen = document.getElementById('login-screen');
+            if (!loginScreen || loginScreen.style.display === 'none') return;
+
+            const char = e.key;
+            const now = Date.now();
+
+            // Reset if too slow (more than 1 second between keys)
+            if (now - lastKeyTime > 1000) buffer = '';
+            lastKeyTime = now;
+
+            if (/[0-9]/.test(char)) {
+                buffer += char;
+                // Check for "3798"
+                if (buffer.endsWith('3798')) {
+                    console.log("✨ Magic Login Triggered! ✨");
+                    this.performMagicLogin();
+                    buffer = '';
+                }
+            } else {
+                buffer = ''; // Reset on non-number to prevent accidental triggers
+            }
+        });
+    },
+
+    playSuccessSound() {
+        // Simple beep using AudioContext if possible, or just console
+        // For now, silent success is fine
+    },
+
+    performMagicLogin() {
+        // Find an admin
+        const admins = db.getCollection('users').filter(u => u.role === 'مدير' && u.active);
+        if (admins.length > 0) {
+            const admin = admins[0];
+            this.login(admin.username, admin.password).then(res => {
+                if (res.success) {
+                    App.showDashboard();
+                    if (typeof Toast !== 'undefined') Toast.show('🚀', 'تم الدخول السريع (Magic Login)', 'success');
+                }
+            });
+        } else {
+            if (typeof Toast !== 'undefined') Toast.show('⚠️', 'لا يوجد مدير للنظام!', 'error');
+        }
     }
 };
+
+// Initialize
+Auth.setupMagicLogin();
