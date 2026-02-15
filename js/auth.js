@@ -44,6 +44,71 @@ const Auth = {
         { key: 'manage_purchases', label: '🚚 إدارة المشتريات', group: 'الإدارة' },
     ],
 
+    async loadUsers() {
+        const select = document.getElementById('login-username');
+        if (!select) return;
+
+        // 1. Load from Local Cache immediately
+        const cached = localStorage.getItem('ares_users_cache');
+        if (cached) {
+            this.populateUserDropdown(JSON.parse(cached));
+        }
+
+        // 2. Fetch from FireStore (if online)
+        if (window.dbFirestore && navigator.onLine) {
+            try {
+                // Assuming single company / single collection for now based on v3.3 state
+                const snapshot = await window.dbFirestore.collection('users').get();
+                if (!snapshot.empty) {
+                    const users = snapshot.docs.map(d => d.data());
+                    // Filter active users only
+                    const activeUsers = users.filter(u => u.active !== false);
+
+                    // Update Cache
+                    localStorage.setItem('ares_users_cache', JSON.stringify(activeUsers));
+
+                    // Update Dropdown
+                    this.populateUserDropdown(activeUsers);
+                    console.log('[Auth] Users refreshed from Cloud');
+                }
+            } catch (e) {
+                console.warn('[Auth] Failed to fetch users from cloud:', e);
+            }
+        }
+
+        // 3. Fallback: If map is empty and no cache, try db.js default
+        if (select.options.length <= 1) { // only "Loading..." option
+            // Ensure at least Admin exists
+            if (select.options.length === 0 || select.value === "") {
+                const adminOpt = document.createElement('option');
+                adminOpt.value = 'admin';
+                adminOpt.textContent = 'admin (System)';
+                select.appendChild(adminOpt);
+            }
+        }
+    },
+
+    populateUserDropdown(users) {
+        const select = document.getElementById('login-username');
+        if (!select) return;
+
+        // Keep selected value if possible
+        const currentVal = select.value;
+
+        select.innerHTML = '<option value="" disabled selected>-- اختر المستخدم --</option>';
+
+        users.forEach(u => {
+            const opt = document.createElement('option');
+            opt.value = u.username;
+            opt.textContent = `${u.name} (${u.role})`;
+            select.appendChild(opt);
+        });
+
+        if (currentVal && Array.from(select.options).some(o => o.value === currentVal)) {
+            select.value = currentVal;
+        }
+    },
+
     async login(username, password) {
         // Try to get users from synced DB first
         let users = db.getCollection('users');

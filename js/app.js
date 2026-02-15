@@ -36,6 +36,10 @@ const App = {
         console.log('[App.init] Calling applyBranding...');
         this.applyBranding();
         this.setupRealtimeUpdates();
+
+        // Load users for login dropdown
+        if (Auth.loadUsers) Auth.loadUsers();
+
         console.log('[App.init] Done.');
     },
 
@@ -262,6 +266,7 @@ const App = {
         document.getElementById('app').style.display = 'none';
         document.getElementById('login-username').value = '';
         document.getElementById('login-password').value = '';
+        if (Auth.loadUsers) Auth.loadUsers();
         setTimeout(() => document.getElementById('login-username').focus(), 300);
     },
 

@@ -4,76 +4,123 @@
 
 const Shifts = {
     render() {
-        const content = document.getElementById('content-body');
-        const shifts = db.getCollection('shifts').reverse();
-        const activeShift = App.activeShiftId ? db.getById('shifts', App.activeShiftId) : null;
+        try {
+            const content = document.getElementById('content-body');
+            if (!content) return;
 
-        content.innerHTML = `
-            <div class="stagger-in">
-                <!-- Active Shift Status -->
-                <div class="glass-card p-24 mb-24" style="background: ${activeShift ? 'linear-gradient(135deg, rgba(0,214,143,0.1), rgba(0,214,143,0.03))' : 'linear-gradient(135deg, rgba(255,77,106,0.1), rgba(255,77,106,0.03))'}; border-color: ${activeShift ? 'rgba(0,214,143,0.2)' : 'rgba(255,77,106,0.2)'};">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h2 style="font-size: 20px; margin-bottom: 8px;">
-                                ${activeShift ? `🟢 ${t('shift_open')}` : `🔴 ${t('no_open_shift')}`}
-                            </h2>
-                            ${activeShift ? `
-                                <p style="color: var(--text-secondary);">
-                                    ${t('shift_started')}: ${Utils.formatDateTime(activeShift.startTime)} |
-                                    ${t('opening_cash')}: ${Utils.formatSAR(activeShift.openingCash || 0)}
-                                </p>
-                            ` : `<p style="color: var(--text-secondary);">${t('open_shift_hint')}</p>`}
-                        </div>
-                        <div>
-                            ${activeShift
-                ? `<button class="btn btn-danger btn-lg" onclick="Shifts.closeShift()">🔒 ${t('close_shift')}</button>`
-                : `<button class="btn btn-success btn-lg" onclick="Shifts.openShift()">🔓 ${t('open_new_shift')}</button>`
+            let shifts = [];
+            try {
+                shifts = db.getCollection('shifts') || [];
+                if (Array.isArray(shifts)) {
+                    shifts = [...shifts].reverse(); // Copy before reverse to avoid mutating original source if cached
+                } else {
+                    shifts = [];
+                }
+            } catch (e) {
+                console.error('[Shifts] Error loading shifts:', e);
+                shifts = [];
             }
+
+            const activeShiftId = App.activeShiftId;
+            let activeShift = null;
+            if (activeShiftId) {
+                // validation
+                activeShift = shifts.find(s => s.id === activeShiftId);
+                // If active shift ID is in App but not in DB, clear it
+                if (!activeShift) {
+                    console.warn('[Shifts] Active shift ID found but shift missing in DB. Clearing.');
+                    App.activeShiftId = null;
+                    // Optional: db.setSetting/Localstorage update might be needed if App.activeShiftId is persisted manually elsewhere
+                    // But usually App.init loads it.
+                }
+            }
+
+            content.innerHTML = `
+                <div class="stagger-in">
+                    <!-- Active Shift Status -->
+                    <div class="glass-card p-24 mb-24" style="background: ${activeShift ? 'linear-gradient(135deg, rgba(0,214,143,0.1), rgba(0,214,143,0.03))' : 'linear-gradient(135deg, rgba(255,77,106,0.1), rgba(255,77,106,0.03))'}; border-color: ${activeShift ? 'rgba(0,214,143,0.2)' : 'rgba(255,77,106,0.2)'};">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 style="font-size: 20px; margin-bottom: 8px;">
+                                    ${activeShift ? `🟢 ${t('shift_open')}` : `🔴 ${t('no_open_shift')}`}
+                                </h2>
+                                ${activeShift ? `
+                                    <p style="color: var(--text-secondary);">
+                                        ${t('shift_started')}: ${Utils.formatDateTime(activeShift.startTime)} |
+                                        ${t('opening_cash')}: ${Utils.formatSAR(activeShift.openingCash || 0)}
+                                    </p>
+                                ` : `<p style="color: var(--text-secondary);">${t('open_shift_hint')}</p>`}
+                            </div>
+                            <div>
+                                ${activeShift
+                    ? `<button class="btn btn-danger btn-lg" onclick="Shifts.closeShift()">🔒 ${t('close_shift')}</button>`
+                    : `<button class="btn btn-success btn-lg" onclick="Shifts.openShift()">🔓 ${t('open_new_shift')}</button>`
+                }
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                ${activeShift ? this.renderActiveShiftStats() : ''}
+                    ${activeShift ? this.renderActiveShiftStats() : ''}
 
-                <!-- Shift History -->
-                <div class="glass-card" style="overflow: hidden;">
-                    <div style="padding: 20px; border-bottom: 1px solid var(--border-color);">
-                        <h3 style="font-size: 16px;">📋 ${t('shift_history')}</h3>
+                    <!-- Shift History -->
+                    <div class="glass-card" style="overflow: hidden;">
+                        <div style="padding: 20px; border-bottom: 1px solid var(--border-color);">
+                            <h3 style="font-size: 16px;">📋 ${t('shift_history')}</h3>
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>${t('employee')}</th>
+                                        <th>${t('shift_start')}</th>
+                                        <th>${t('shift_end')}</th>
+                                        <th>${t('opening_cash')}</th>
+                                        <th>${t('total_sales')}</th>
+                                        <th>${t('status')}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${shifts.map(s => {
+                    try {
+                        const shiftSales = db.query('sales', sale => sale.shiftId === s.id);
+                        const totalSales = shiftSales.reduce((sum, sale) => sum + sale.total, 0);
+                        return `
+                                            <tr>
+                                                <td><strong>${s.userName || '—'}</strong></td>
+                                                <td style="font-size:13px;">${Utils.formatDateTime(s.startTime)}</td>
+                                                <td style="font-size:13px;">${s.endTime ? Utils.formatDateTime(s.endTime) : '—'}</td>
+                                                <td style="font-family:Inter;">${Utils.formatSAR(s.openingCash || 0)}</td>
+                                                <td style="font-family:Inter; font-weight:600;">${Utils.formatSAR(totalSales)}</td>
+                                                <td>
+                                                    <span class="badge ${s.status === 'open' ? 'badge-success' : 'badge-info'}">${s.status === 'open' ? t('status_open') : t('status_closed')}</span>
+                                                    ${s.status === 'closed' ? `<button class="btn btn-ghost btn-sm" onclick="Shifts.printShiftReport('${s.id}')" title="${t('print')}">🖨️</button>` : ''}
+                                                </td>
+                                            </tr>`;
+                    } catch (err) {
+                        console.error('Error rendering shift row:', s, err);
+                        return '';
+                    }
+                }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                        ${shifts.length === 0 ? `<div class="empty-state p-24"><p>${t('no_shift_history')}</p></div>` : ''}
                     </div>
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>${t('employee')}</th>
-                                <th>${t('shift_start')}</th>
-                                <th>${t('shift_end')}</th>
-                                <th>${t('opening_cash')}</th>
-                                <th>${t('total_sales')}</th>
-                                <th>${t('status')}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${shifts.map(s => {
-                const shiftSales = db.query('sales', sale => sale.shiftId === s.id);
-                const totalSales = shiftSales.reduce((sum, sale) => sum + sale.total, 0);
-                return `
-                                <tr>
-                                    <td><strong>${s.userName || '—'}</strong></td>
-                                    <td style="font-size:13px;">${Utils.formatDateTime(s.startTime)}</td>
-                                    <td style="font-size:13px;">${s.endTime ? Utils.formatDateTime(s.endTime) : '—'}</td>
-                                    <td style="font-family:Inter;">${Utils.formatSAR(s.openingCash || 0)}</td>
-                                    <td style="font-family:Inter; font-weight:600;">${Utils.formatSAR(totalSales)}</td>
-                                    <td>
-                                        <span class="badge ${s.status === 'open' ? 'badge-success' : 'badge-info'}">${s.status === 'open' ? t('status_open') : t('status_closed')}</span>
-                                        ${s.status === 'closed' ? `<button class="btn btn-ghost btn-sm" onclick="Shifts.printShiftReport('${s.id}')" title="${t('print')}">🖨️</button>` : ''}
-                                    </td>
-                                </tr>`;
-            }).join('')}
-                        </tbody>
-                    </table>
-                    ${shifts.length === 0 ? `<div class="empty-state p-24"><p>${t('no_shift_history')}</p></div>` : ''}
                 </div>
-            </div>
-        `;
+            `;
+        } catch (e) {
+            console.error('[Shifts] Render error:', e);
+            const content = document.getElementById('content-body');
+            if (content) {
+                content.innerHTML = `
+                    <div class="text-center p-24">
+                        <h3 style="color:var(--danger)">⚠️ Error loading shifts</h3>
+                        <p>${e.message}</p>
+                        <button class="btn btn-primary mt-4" onclick="location.reload()">Reload</button>
+                    </div>
+                `;
+            }
+        }
     },
 
     renderActiveShiftStats() {
@@ -109,35 +156,60 @@ const Shifts = {
     },
 
     openShift() {
-        Modal.show(`🔓 ${t('open_new_shift')}`, `
-            <div class="form-group">
-                <label>${t('opening_cash')} (${t('sar')})</label>
-                <input type="number" class="form-control" id="opening-cash" value="0" min="0" step="0.01">
-            </div>
-            <div class="glass-card p-20" style="background: var(--info-bg); border-color: rgba(0,180,216,0.2);">
-                <p style="font-size: 13px; color: var(--info);">
-                    ℹ️ ${t('shift_register_msg')}: <strong>${Auth.currentUser.name}</strong>
-                </p>
-            </div>
-        `, `
-            <button class="btn btn-success" onclick="Shifts.confirmOpen()">✅ ${t('open_shift')}</button>
-            <button class="btn btn-ghost" onclick="Modal.hide()">${t('cancel')}</button>
-        `);
+        if (!Auth.currentUser) {
+            Toast.show(t('error'), 'User session invalid. Please relogin.', 'error');
+            return;
+        }
+
+        try {
+            Modal.show(`🔓 ${t('open_new_shift')}`, `
+                <div class="form-group">
+                    <label>${t('opening_cash')} (${t('sar')})</label>
+                    <input type="number" class="form-control" id="opening-cash" value="0" min="0" step="0.01">
+                </div>
+                <div class="glass-card p-20" style="background: var(--info-bg); border-color: rgba(0,180,216,0.2);">
+                    <p style="font-size: 13px; color: var(--info);">
+                        ℹ️ ${t('shift_register_msg')}: <strong>${Auth.currentUser.name}</strong>
+                    </p>
+                </div>
+            `, `
+                <button class="btn btn-success" onclick="Shifts.confirmOpen()">✅ ${t('open_shift')}</button>
+                <button class="btn btn-ghost" onclick="Modal.hide()">${t('cancel')}</button>
+            `);
+        } catch (e) {
+            console.error('[Shifts] openShift error:', e);
+            Toast.show(t('error'), 'Error opening shift dialog', 'error');
+        }
     },
 
     confirmOpen() {
-        const openingCash = parseFloat(document.getElementById('opening-cash').value) || 0;
-        const shift = db.insert('shifts', {
-            userId: Auth.currentUser.id,
-            userName: Auth.currentUser.name,
-            startTime: Utils.isoDate(),
-            openingCash,
-            status: 'open'
-        });
-        App.activeShiftId = shift.id;
-        Modal.hide();
-        Toast.show(t('success'), t('shift_opened'), 'success');
-        this.render();
+        if (!Auth.currentUser) {
+            Toast.show(t('error'), 'User session lost', 'error');
+            return;
+        }
+
+        try {
+            const openingCashInput = document.getElementById('opening-cash');
+            const openingCash = openingCashInput ? (parseFloat(openingCashInput.value) || 0) : 0;
+
+            const shift = db.insert('shifts', {
+                userId: Auth.currentUser.id,
+                userName: Auth.currentUser.name,
+                startTime: Utils.isoDate(),
+                openingCash,
+                status: 'open'
+            });
+
+            App.activeShiftId = shift.id;
+            Modal.hide();
+            Toast.show(t('success'), t('shift_opened'), 'success');
+            this.render();
+            // Force re-render of dashboard if we are there
+            if (App.currentScreen === 'dashboard') Dashboard.render();
+        } catch (e) {
+            console.error('[Shifts] confirmOpen error:', e);
+            Toast.show(t('error'), 'Failed to create shift in database', 'error');
+        }
     },
 
     closeShift() {
