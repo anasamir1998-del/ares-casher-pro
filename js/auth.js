@@ -57,19 +57,29 @@ const Auth = {
             if (dbUsers && dbUsers.length > 0) availableUsers = dbUsers;
         }
 
-        // If DB empty, try explicit cache
-        if (availableUsers.length === 0) {
-            const cached = localStorage.getItem('ares_users_cache');
-            if (cached) availableUsers = JSON.parse(cached);
-        }
+        // Guarantee Admin Existence (Auto-Heal)
+        const adminExists = availableUsers.some(u => u.username === 'admin');
+        if (!adminExists) {
+            console.log("Auth: Admin missing. Injecting System Admin.");
+            const sysAdmin = {
+                id: '1',
+                name: 'مدير النظام',
+                username: 'admin',
+                password: '123',
+                role: 'مدير',
+                permissions: null,
+                active: true
+            };
+            availableUsers.unshift(sysAdmin); // Add to top of list
 
-        // 2. Emergency: If still empty, force Admin
-        if (availableUsers.length === 0) {
-            console.log("Auth: No users found. Creating default admin.");
-            const adminUser = { id: '1', name: 'مدير النظام', username: 'admin', password: '123', role: 'مدير', permissions: null, active: true };
-            availableUsers = [adminUser];
-            // Persist this fix
-            if (typeof db !== 'undefined') db.setCollection('users', availableUsers);
+            // Persist valid admin to DB immediately
+            if (typeof db !== 'undefined') {
+                // Check if it's really missing from DB or just filtered
+                const currentDb = db.getCollection('users');
+                if (!currentDb.some(u => u.username === 'admin')) {
+                    db.insert('users', sysAdmin);
+                }
+            }
         }
 
         // 3. Render Immediately
