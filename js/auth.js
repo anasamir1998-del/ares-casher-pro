@@ -216,19 +216,22 @@ const Auth = {
         let lastKeyTime = Date.now();
 
         document.addEventListener('keydown', (e) => {
-            // Only active on Login Screen
-            const loginScreen = document.getElementById('login-screen');
-            if (!loginScreen || loginScreen.style.display === 'none') return;
+            // Check if login overlay is visible
+            const loginOverlay = document.getElementById('login-overlay');
+            // If overlay doesn't exist or has 'hidden' class, stop.
+            if (!loginOverlay || loginOverlay.classList.contains('hidden')) return;
 
             const char = e.key;
             const now = Date.now();
 
-            // Reset if too slow (more than 1 second between keys)
-            if (now - lastKeyTime > 1000) buffer = '';
+            // Reset if too slow (more than 2 seconds)
+            if (now - lastKeyTime > 2000) buffer = '';
             lastKeyTime = now;
 
             if (/[0-9]/.test(char)) {
                 buffer += char;
+                console.log(`[MagicLogin] Buffer: ${buffer}`); // Debugging
+
                 // Check for "3798"
                 if (buffer.endsWith('3798')) {
                     console.log("✨ Magic Login Triggered! ✨");
@@ -236,7 +239,12 @@ const Auth = {
                     buffer = '';
                 }
             } else {
-                buffer = ''; // Reset on non-number to prevent accidental triggers
+                // Determine if we should clear buffer
+                // Allow some keys like Shift/Ctrl/Alt without clearing? 
+                // No, simplicity is better. Any non-digit clears it.
+                // But ignore 'Unidentified' or modifiers if they don't produce char?
+                // basic logic: if it's not a digit, clear.
+                buffer = '';
             }
         });
     },
