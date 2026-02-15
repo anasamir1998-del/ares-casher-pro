@@ -147,7 +147,13 @@ const Purchases = {
     renderNewPurchase() {
         // this.cart = []; // REMOVED: Managed by switchTab now
         const suppliers = db.getCollection('suppliers');
-        const products = db.getCollection('products');
+        const currentBranch = Auth.getBranchId();
+        const allProducts = db.getCollection('products');
+
+        // Product Scope
+        const products = currentBranch
+            ? allProducts.filter(p => !p.branchId || p.branchId === currentBranch)
+            : allProducts;
 
         return `
             <div class="grid-layout" style="grid-template-columns: 1fr 350px; gap:24px;">
@@ -325,7 +331,8 @@ const Purchases = {
             date,
             items: this.cart.map(i => ({ ...i })), // Deep copy to prevent reference issues
             total,
-            itemsCount: this.cart.length
+            itemsCount: this.cart.length,
+            branchId: Auth.getBranchId() // Tag with Branch
         };
 
         if (this.editingPurchaseId) {
@@ -451,7 +458,13 @@ const Purchases = {
 
     /* ── History Logic ── */
     renderHistory() {
-        const purchases = db.getCollection('purchases').reverse();
+        const currentBranch = Auth.getBranchId();
+        let purchases = db.getCollection('purchases').reverse();
+
+        // Scope
+        if (currentBranch) {
+            purchases = purchases.filter(p => !p.branchId || p.branchId === currentBranch);
+        }
         const suppliers = db.getCollection('suppliers');
 
         return `

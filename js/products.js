@@ -20,8 +20,14 @@ const Products = {
 
     render() {
         const content = document.getElementById('content-body');
-        const products = db.getCollection('products');
+        const allProducts = db.getCollection('products');
         const categories = db.getCollection('categories');
+
+        // Scope Logic
+        const currentBranch = Auth.getBranchId();
+        const products = currentBranch
+            ? allProducts.filter(p => !p.branchId || p.branchId === currentBranch) // Show Global + Branch Specific
+            : allProducts; // Show All for Global Admin
 
         content.innerHTML = `
             <div class="stagger-in">
@@ -108,8 +114,15 @@ const Products = {
     },
 
     filterProducts(query) {
-        const products = db.getCollection('products');
+        const allProducts = db.getCollection('products');
         const categories = db.getCollection('categories');
+        const currentBranch = Auth.getBranchId();
+
+        // Scope
+        const products = currentBranch
+            ? allProducts.filter(p => !p.branchId || p.branchId === currentBranch)
+            : allProducts;
+
         const filtered = query
             ? products.filter(p => p.name.includes(query) || (p.barcode && p.barcode.includes(query)))
             : products;
@@ -117,8 +130,15 @@ const Products = {
     },
 
     filterByCategory(catId) {
-        const products = db.getCollection('products');
+        const allProducts = db.getCollection('products');
         const categories = db.getCollection('categories');
+        const currentBranch = Auth.getBranchId();
+
+        // Scope
+        const products = currentBranch
+            ? allProducts.filter(p => !p.branchId || p.branchId === currentBranch)
+            : allProducts;
+
         const filtered = catId === 'all' ? products : products.filter(p => p.categoryId === catId);
         document.getElementById('products-tbody').innerHTML = this.renderProductsRows(filtered, categories);
     },
@@ -132,6 +152,25 @@ const Products = {
         const currentDisplay = product?.image
             ? `<img src="${product.image}" style="width:100%;height:100%;object-fit:cover;">`
             : `<span class="upload-icon">${product?.emoji || '📷'}</span><span class="upload-text">${product?.emoji ? '' : t('upload_image')}</span>`;
+
+        // Branch Selection (For Global Admins Only)
+        let branchSelectHtml = '';
+        if (Auth.isGlobal()) {
+            const branches = db.getCollection('branches');
+            const activeBranches = branches.filter(b => b.active);
+            branchSelectHtml = `
+                <div class="form-group mb-12">
+                    <label>${t('branch')} (${t('admin_only')})</label>
+                    <select class="form-control" id="p-branch">
+                        <option value="">🌐 ${t('all_branches')} (${t('shared')})</option>
+                        ${activeBranches.map(b => `<option value="${b.id}" ${product?.branchId === b.id ? 'selected' : ''}>${b.name}</option>`).join('')}
+                    </select>
+                </div>
+            `;
+        } else {
+            // Hidden default
+            branchSelectHtml = `<input type="hidden" id="p-branch" value="${product?.branchId || Auth.getBranchId() || ''}">`;
+        }
 
         Modal.show(id ? `✏️ ${t('edit_product')}` : `➕ ${t('add_product')}`, `
             <div class="flex gap-20 mb-20">
@@ -350,6 +389,7 @@ const Products = {
         const active = document.getElementById('p-active').value === 'true';
         const showInPos = document.getElementById('p-show-pos').checked;
         const notes = document.getElementById('p-notes').value.trim();
+        const branchId = document.getElementById('p-branch') ? document.getElementById('p-branch').value : (Auth.getBranchId() || null);
 
         if (!name || isNaN(price) || price < 0) {
             Toast.show(t('error'), t('enter_product_name_price'), 'error');
@@ -363,7 +403,8 @@ const Products = {
             minStock: type === 'service' ? 0 : minStock,
             barcode, active, showInPos, notes,
             image: this.selectedImage || null,
-            emoji: this.selectedEmoji || null
+            emoji: this.selectedEmoji || null,
+            branchId: branchId // Persist Branch ID
         };
 
         if (id) {

@@ -9,6 +9,7 @@ const Settings = {
             <div class="stagger-in">
                 <div class="tabs mb-24" style="flex-wrap:wrap;">
                     <button class="tab-btn active" onclick="Settings.switchTab(this, 'company')">🏢 ${t('company')}</button>
+                    <button class="tab-btn" onclick="Settings.switchTab(this, 'branches')">🏘️ ${t('branches') || 'Branches'}</button>
                     <button class="tab-btn" onclick="Settings.switchTab(this, 'tax')">🏦 ${t('tax_settings')}</button>
                     <button class="tab-btn" onclick="Settings.switchTab(this, 'users')">👥 ${t('users')}</button>
                     <button class="tab-btn" onclick="Settings.switchTab(this, 'appearance')">🎨 ${t('appearance')}</button>
@@ -95,6 +96,188 @@ const Settings = {
             case 'backup': container.innerHTML = this.renderBackupSettings(); break;
             case 'cloud': container.innerHTML = this.renderCloudSettings(); break;
         }
+    },
+
+    renderBranchSettings() {
+        const branches = db.getCollection('branches');
+
+        let html = `
+            <div class="settings-card">
+                <div class="card-header">
+                    <h3>🏘️ ${t('branch_management')}</h3>
+                    <button class="btn btn-primary" onclick="Settings.showAddBranchModal()">
+                        <i class="fas fa-plus"></i> ${t('add_branch')}
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>${t('branch_name')}</th>
+                                    <th>${t('branch_phone')}</th>
+                                    <th>${t('branch_address')}</th>
+                                    <th>${t('status')}</th>
+                                    <th>${t('actions')}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+        `;
+
+        // Render Rows
+        if (branches.length === 0) {
+            html += `<tr><td colspan="5" style="text-align:center;">${t('no_data')}</td></tr>`;
+        } else {
+            branches.forEach(branch => {
+                const isMain = branch.isMain ? `<span class="badge badge-success">${t('main_branch')}</span>` : '';
+                const active = branch.active ? `<span class="badge badge-success">${t('active')}</span>` : `<span class="badge badge-danger">${t('inactive')}</span>`;
+
+                html += `
+                    <tr>
+                        <td>
+                            <strong>${branch.name}</strong>
+                            ${isMain}
+                        </td>
+                        <td>${branch.phone || '-'}</td>
+                        <td>${branch.address || '-'}</td>
+                        <td>${active}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-icon" onclick="Settings.editBranch('${branch.id}')" title="${t('edit')}">✏️</button>
+                                ${!branch.isMain ? `<button class="btn-icon delete" onclick="Settings.deleteBranch('${branch.id}')" title="${t('delete')}">🗑️</button>` : ''}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        html += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        `;
+        return html;
+    },
+
+    showAddBranchModal() {
+        const modalId = 'add-branch-modal';
+        let modal = document.getElementById(modalId);
+
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = modalId;
+            modal.className = 'modal';
+            document.body.appendChild(modal);
+        }
+
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>${t('add_branch')}</h2>
+                    <span class="close" onclick="document.getElementById('${modalId}').style.display='none'">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>${t('branch_name')} *</label>
+                        <input type="text" id="branch-name" class="form-control" placeholder="${t('branch_name')}">
+                    </div>
+                    <div class="form-group">
+                        <label>${t('branch_phone')}</label>
+                        <input type="text" id="branch-phone" class="form-control" placeholder="${t('branch_phone')}">
+                    </div>
+                    <div class="form-group">
+                        <label>${t('branch_address')}</label>
+                        <input type="text" id="branch-address" class="form-control" placeholder="${t('branch_address')}">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="document.getElementById('${modalId}').style.display='none'">${t('cancel')}</button>
+                    <button class="btn btn-primary" onclick="Settings.saveBranch()">${t('save')}</button>
+                </div>
+            </div>
+        `;
+
+        modal.style.display = 'block';
+        document.getElementById('branch-name').focus();
+    },
+
+    editBranch(id) {
+        const branches = db.getCollection('branches');
+        const branch = branches.find(b => b.id === id);
+        if (!branch) return;
+
+        this.showAddBranchModal(); // Re-use modal structure
+
+        // Update Modal Title and Button
+        const modal = document.getElementById('add-branch-modal');
+        modal.querySelector('.modal-header h2').textContent = t('edit_branch');
+        modal.querySelector('.modal-footer .btn-primary').onclick = () => Settings.saveBranch(id);
+
+        // Fill Data
+        document.getElementById('branch-name').value = branch.name;
+        document.getElementById('branch-phone').value = branch.phone || '';
+        document.getElementById('branch-address').value = branch.address || '';
+    },
+
+    saveBranch(editId = null) {
+        const name = document.getElementById('branch-name').value.trim();
+        const phone = document.getElementById('branch-phone').value.trim();
+        const address = document.getElementById('branch-address').value.trim();
+
+        if (!name) {
+            Toast.show(t('warning'), t('enter_name_username'), 'warning'); // Reuse message
+            return;
+        }
+
+        let branches = db.getCollection('branches');
+
+        if (editId) {
+            // Edit
+            const index = branches.findIndex(b => b.id === editId);
+            if (index !== -1) {
+                branches[index].name = name;
+                branches[index].phone = phone;
+                branches[index].address = address;
+                db.setCollection('branches', branches);
+                Toast.show(t('success'), t('branch_edited'), 'success');
+            }
+        } else {
+            // Add
+            const newBranch = {
+                id: 'branch_' + Date.now(),
+                name: name,
+                phone: phone,
+                address: address,
+                active: true,
+                isMain: false
+            };
+            branches.push(newBranch);
+            db.setCollection('branches', branches);
+            Toast.show(t('success'), t('branch_added'), 'success');
+        }
+
+        document.getElementById('add-branch-modal').style.display = 'none';
+        // Refresh Tab
+        document.querySelector('.tab-btn.active[onclick*="branches"]').click();
+    },
+
+    deleteBranch(id) {
+        if (!confirm(t('confirm_delete_branch'))) return;
+
+        // Prevent deleting main branch (extra safety)
+        const branches = db.getCollection('branches');
+        const branch = branches.find(b => b.id === id);
+        if (branch && branch.isMain) {
+            Toast.show(t('error'), t('not_allowed'), 'error');
+            return;
+        }
+
+        db.delete('branches', id);
+        Toast.show(t('success'), t('branch_deleted'), 'success');
+        document.querySelector('.tab-btn.active[onclick*="branches"]').click();
     },
 
     renderCompanySettings() {

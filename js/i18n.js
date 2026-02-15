@@ -553,6 +553,27 @@ const I18n = {
         invoice_date: { ar: 'تاريخ الفاتورة', en: 'Invoice Date', ur: 'انوائس کی تاریخ' },
         items_count: { ar: 'عدد الأصناف', en: 'Items Count', ur: 'اشیاء کی تعداد' },
         total_cost: { ar: 'إجمالي التكلفة', en: 'Total Cost', ur: 'کل لاگت' },
+
+        // ── Branch Management ──────────────────────────
+        branches: { ar: 'الفروع', en: 'Branches', ur: 'شاخیں' },
+        branch_management: { ar: 'إدارة الفروع', en: 'Branch Management', ur: 'برانچ مینجمنٹ' },
+        add_branch: { ar: 'إضافة فرع', en: 'Add Branch', ur: 'برانچ شامل کریں' },
+        edit_branch: { ar: 'تعديل الفرع', en: 'Edit Branch', ur: 'برانچ ترمیم' },
+        branch_name: { ar: 'اسم الفرع', en: 'Branch Name', ur: 'برانچ کا نام' },
+        main_branch: { ar: 'الفرع الرئيسي', en: 'Main Branch', ur: 'مین برانچ' },
+        set_as_main: { ar: 'تعيين كفرع رئيسي', en: 'Set as Main', ur: 'مین کے طور پر سیٹ کریں' },
+        branch_phone: { ar: 'هاتف الفرع', en: 'Branch Phone', ur: 'برانچ فون' },
+        branch_address: { ar: 'عنوان الفرع', en: 'Branch Address', ur: 'برانچ پتہ' },
+        delete_branch: { ar: 'حذف الفرع', en: 'Delete Branch', ur: 'برانچ حذف' },
+        confirm_delete_branch: { ar: 'هل أنت متأكد من حذف هذا الفرع؟', en: 'Are you sure you want to delete this branch?', ur: 'کیا آپ واقعی اس برانچ کو حذف کرنا چاہتے ہیں؟' },
+        branch_added: { ar: 'تم إضافة الفرع بنجاح', en: 'Branch added successfully', ur: 'برانچ کامیابی سے شامل' },
+        branch_edited: { ar: 'تم تعديل الفرع بنجاح', en: 'Branch edited successfully', ur: 'برانچ کامیابی سے ترمیم' },
+        branch_deleted: { ar: 'تم حذف الفرع', en: 'Branch deleted', ur: 'برانچ حذف ہو گئی' },
+        select_branch: { ar: 'اختر الفرع', en: 'Select Branch', ur: 'برانچ منتخب کریں' },
+        current_branch: { ar: 'الفرع الحالي', en: 'Current Branch', ur: 'موجودہ برانچ' },
+        switch_branch: { ar: 'تبديل الفرع', en: 'Switch Branch', ur: 'برانچ تبدیل کریں' },
+        all_branches: { ar: 'كل الفروع', en: 'All Branches', ur: 'تمام شاخیں' },
+        branch_required: { ar: 'يرجى اختيار الفرع', en: 'Please select a branch', ur: 'براہ کرم برانچ منتخب کریں' },
     },
 
     init() {

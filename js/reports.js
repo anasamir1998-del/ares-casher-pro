@@ -41,12 +41,17 @@ const Reports = {
         }
     },
 
-    // Helper: get sales filtered by user
+    // Helper: get sales filtered by user/branch
     getUserSales(filterFn) {
         const isAdmin = Auth.isAdmin();
         const userId = Auth.currentUser.id;
+        const currentBranch = Auth.getBranchId();
+
         return db.query('sales', s => {
-            if (!isAdmin && s.cashierId !== userId) return false;
+            // Branch Scope
+            if (currentBranch && s.branchId !== currentBranch) return false;
+
+            if (!isAdmin && !Auth.isSupervisor() && s.cashierId !== userId) return false;
             return filterFn ? filterFn(s) : true;
         });
     },
@@ -164,10 +169,15 @@ const Reports = {
     },
 
     renderVATReport() {
-        // VAT report always shows ALL data (admin-only access)
+        // VAT report always shows ALL data (admin-only access) -> Now Scoped by Branch if applicable
         const now = new Date();
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-        const sales = db.query('sales', s => new Date(s.createdAt) >= startOfMonth);
+        const currentBranch = Auth.getBranchId();
+
+        const sales = db.query('sales', s => {
+            if (currentBranch && s.branchId !== currentBranch) return false;
+            return new Date(s.createdAt) >= startOfMonth;
+        });
         const totalSales = sales.reduce((sum, s) => sum + (s.afterDiscount || s.subtotal), 0);
         const totalVAT = sales.reduce((sum, s) => sum + s.vatAmount, 0);
         const totalWithVAT = sales.reduce((sum, s) => sum + s.total, 0);
@@ -217,8 +227,13 @@ const Reports = {
     },
 
     renderProductsReport() {
-        // Products report always shows ALL data (admin-only access)
-        const sales = db.getCollection('sales');
+        // Products report always shows ALL data (admin-only access) -> Now Scoped
+        const currentBranch = Auth.getBranchId();
+        let sales = db.getCollection('sales');
+
+        if (currentBranch) {
+            sales = sales.filter(s => !s.branchId || s.branchId === currentBranch);
+        }
         const productStats = {};
         sales.forEach(s => {
             (s.items || []).forEach(item => {

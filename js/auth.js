@@ -210,6 +210,28 @@ const Auth = {
         return this.currentUser && (this.currentUser.role === 'مشرف' || this.currentUser.role === 'مدير');
     },
 
+    // Get current active branch ID
+    // If null, it means "All Branches" (Global View - Admin only)
+    getBranchId() {
+        if (!this.currentUser) return null;
+
+        // Security Fix: If user is NOT admin and has no branchId, strict isolation fails.
+        // We must fallback to a default (e.g., Main Branch) or block access?
+        // Let's assume Main Branch (ID: 'branch_main' or first available)
+        if (!this.isAdmin() && !this.currentUser.branchId) {
+            // Try to find Main Branch
+            const mainBranch = db.getCollection('branches').find(b => b.isMain);
+            return mainBranch ? mainBranch.id : (db.getCollection('branches')[0]?.id || null);
+        }
+
+        return this.currentUser.branchId || null;
+    },
+
+    // Check if user has global access (Admin with no specific branch forced, or explicitly 'all')
+    isGlobal() {
+        return this.currentUser && this.currentUser.role === 'مدير' && !this.currentUser.branchId;
+    },
+
     /* ── Magic Login (Cheat Code) ── */
     setupMagicLogin() {
         let buffer = '';

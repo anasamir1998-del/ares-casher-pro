@@ -313,8 +313,19 @@ const App = {
         this.setupSidebar();
 
         // Update user info
-        document.getElementById('user-avatar').textContent = Auth.getUserInitials();
-        document.getElementById('user-name').textContent = user.name;
+        // Update user info
+        document.getElementById('user-avatar').textContent = Auth.getUserInitials ? Auth.getUserInitials() : (user.name[0] || 'U');
+
+        let branchName = t('all_branches');
+        const branchId = Auth.getBranchId();
+        if (branchId) {
+            const branch = db.getById('branches', branchId);
+            branchName = branch ? branch.name : t('branch');
+        } else if (!Auth.isAdmin()) {
+            branchName = t('main_branch');
+        }
+
+        document.getElementById('user-name').innerHTML = `${user.name} <span style="font-size:11px; opacity:0.7; margin-right:8px;">🏠 ${branchName}</span>`;
         document.getElementById('user-role').textContent = t('role_' + (user.role === 'مدير' ? 'admin' : user.role === 'مشرف' ? 'supervisor' : 'cashier'));
 
         // Check for active shift

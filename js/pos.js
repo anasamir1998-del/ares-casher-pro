@@ -88,7 +88,16 @@ const POS = {
     },
 
     renderProducts() {
-        let products = db.getCollection('products').filter(p => p.active !== false && p.showInPos !== false);
+        const allProducts = db.getCollection('products');
+        const currentBranch = Auth.getBranchId();
+
+        // Scope
+        let products = currentBranch
+            ? allProducts.filter(p => !p.branchId || p.branchId === currentBranch)
+            : allProducts;
+
+        // Active & ShowInPos
+        products = products.filter(p => p.active !== false && p.showInPos !== false);
 
         // Filter by category
         if (this.selectedCategory) {
@@ -537,6 +546,7 @@ const POS = {
             customerVAT,
             cashierName: Auth.currentUser.name,
             cashierId: Auth.currentUser.id,
+            branchId: Auth.getBranchId(), // Tag with Branch
             shiftId: App.activeShiftId,
             cashAmount,
             changeAmount: cashAmount - total

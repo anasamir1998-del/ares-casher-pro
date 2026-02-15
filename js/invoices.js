@@ -8,8 +8,15 @@ const Invoices = {
         const isAdmin = Auth.isAdmin(); // Keep for UI logic, but filter data by permission
         const userId = Auth.currentUser.id;
         const canViewAll = Auth.hasPermission('view_invoices'); // Renaming concept: view_invoices now means ALL invoices
+        const currentBranch = Auth.getBranchId();
 
         let sales = db.getCollection('sales').reverse();
+
+        // Branch Scope
+        if (currentBranch) {
+            sales = sales.filter(s => !s.branchId || s.branchId === currentBranch);
+        }
+
         if (!canViewAll) {
             sales = sales.filter(s => s.cashierId === userId);
         }

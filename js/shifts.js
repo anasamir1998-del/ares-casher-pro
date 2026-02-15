@@ -14,12 +14,19 @@ const Shifts = {
 
             let shifts = [];
             try {
-                shifts = db.getCollection('shifts') || [];
-                console.log(`[Shifts] Loaded ${shifts.length} shifts from DB`);
+                const allShifts = db.getCollection('shifts') || [];
+                const currentBranch = Auth.getBranchId();
+
+                // Scope
+                shifts = currentBranch
+                    ? allShifts.filter(s => !s.branchId || s.branchId === currentBranch)
+                    : allShifts;
+
+                console.log(`[Shifts] Loaded ${shifts.length} shifts (Branch: ${currentBranch || 'Global'})`);
+
                 if (Array.isArray(shifts)) {
                     shifts = [...shifts].reverse();
                 } else {
-                    console.warn('[Shifts] Shifts is not an array, resetting to []');
                     shifts = [];
                 }
             } catch (e) {
@@ -210,6 +217,7 @@ const Shifts = {
             const shift = db.insert('shifts', {
                 userId: Auth.currentUser.id,
                 userName: Auth.currentUser.name,
+                branchId: Auth.getBranchId(), // Tag with Branch
                 startTime: Utils.isoDate(),
                 openingCash,
                 status: 'open'

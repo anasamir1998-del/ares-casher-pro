@@ -285,6 +285,13 @@ class Database {
         if (!localStorage.getItem(this.prefix + 'suppliers')) this.setCollection('suppliers', []);
         if (!localStorage.getItem(this.prefix + 'purchases')) this.setCollection('purchases', []);
 
+        // Initialize Branches
+        if (!localStorage.getItem(this.prefix + 'branches')) {
+            this.setCollection('branches', [
+                { id: 'branch_main', name: 'الفرع الرئيسي', address: '', phone: '', active: true, isMain: true }
+            ]);
+        }
+
         // Check if users exist, otherwise create Admin
         const users = this.getCollection('users');
         if (users.length === 0) {

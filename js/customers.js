@@ -5,7 +5,13 @@
 const Customers = {
     render() {
         const content = document.getElementById('content-body');
-        const customers = db.getCollection('customers');
+        const allCustomers = db.getCollection('customers');
+        const currentBranch = Auth.getBranchId();
+
+        // Scope
+        const customers = currentBranch
+            ? allCustomers.filter(c => !c.branchId || c.branchId === currentBranch)
+            : allCustomers;
 
         content.innerHTML = `
             <div class="stagger-in">
@@ -86,6 +92,16 @@ const Customers = {
                 <label>${t('address')}</label>
                 <textarea class="form-control" id="c-address" rows="2">${customer?.address || ''}</textarea>
             </div>
+            
+            ${Auth.isGlobal() ? `
+            <div class="form-group">
+                <label>${t('branch')} (${t('admin_only')})</label>
+                <select class="form-control" id="c-branch">
+                    <option value="">🌐 ${t('all_branches')}</option>
+                    ${db.getCollection('branches').filter(b => b.active).map(b => `<option value="${b.id}" ${customer?.branchId === b.id ? 'selected' : ''}>${b.name}</option>`).join('')}
+                </select>
+            </div>
+            ` : `<input type="hidden" id="c-branch" value="${customer?.branchId || Auth.getBranchId() || ''}">`}
         `, `
             <button class="btn btn-primary" onclick="Customers.saveCustomer(${isEdit ? `'${customer.id}'` : 'null'})">${isEdit ? t('save_changes') : t('add_customer')}</button>
             <button class="btn btn-ghost" onclick="Modal.hide()">${t('cancel')}</button>
@@ -103,7 +119,8 @@ const Customers = {
             phone: document.getElementById('c-phone').value.trim(),
             email: document.getElementById('c-email').value.trim(),
             vatNumber: document.getElementById('c-vat').value.trim(),
-            address: document.getElementById('c-address').value.trim()
+            address: document.getElementById('c-address').value.trim(),
+            branchId: document.getElementById('c-branch') ? document.getElementById('c-branch').value : (Auth.getBranchId() || null)
         };
         if (id) {
             db.update('customers', id, data);

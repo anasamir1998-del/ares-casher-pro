@@ -10,11 +10,26 @@ const Dashboard = {
 
         const isAdmin = Auth.isAdmin();
         const userId = Auth.currentUser.id;
+        const currentBranch = Auth.getBranchId();
 
-        // Get today's sales — filtered by user if not admin
+        // Get today's sales — filtered by user/branch
         const todaySales = db.query('sales', s => {
+            // Branch Scope
+            if (currentBranch && s.branchId !== currentBranch) return false;
+
+            // Time Scope
             if (new Date(s.createdAt) < today) return false;
-            if (!isAdmin && s.cashierId !== userId) return false;
+
+            // Role Scope (Cashiers only see their own sales? Or Shift sales?)
+            // Usually Dashboard shows total for the branch if permissible.
+            // If strictly cashier, maybe only own?
+            // "Admin sees all" -> covered by isAdmin check for logic below, but here we gather data.
+            // Let's assume Managers/Supervisors see Branch Total. Cashiers see Branch Total (or own?).
+            // Existing code: if (!isAdmin && s.cashierId !== userId) return false;
+            // This means non-admins ONLY see their own sales. 
+            // If we have "Supervisor" role, they should probably see Branch Sales.
+            if (!isAdmin && !Auth.isSupervisor() && s.cashierId !== userId) return false;
+
             return true;
         });
 
@@ -22,10 +37,13 @@ const Dashboard = {
         const totalVAT = todaySales.reduce((sum, s) => sum + s.vatAmount, 0);
         const invoiceCount = todaySales.length;
 
-        // Admin-only data
-        const productsCount = db.count('products');
-        const customersCount = db.count('customers');
-        const lowStock = db.query('products', p => p.type !== 'service' && p.stock !== undefined && p.stock <= 10);
+        // Stats - Filtered by Branch
+        const productsCount = db.getCollection('products').filter(p => !currentBranch || p.branchId === currentBranch).length;
+        const customersCount = db.getCollection('customers').filter(c => !currentBranch || c.branchId === currentBranch).length;
+        const lowStock = db.query('products', p =>
+            (!currentBranch || p.branchId === currentBranch) &&
+            p.type !== 'service' && p.stock !== undefined && p.stock <= (p.minStock || 5)
+        );
 
         // Role label
         const scopeLabel = isAdmin ? t('all_sales') : t('your_sales');
@@ -132,9 +150,16 @@ const Dashboard = {
     renderRecentSales() {
         const isAdmin = Auth.isAdmin();
         const userId = Auth.currentUser.id;
+        const currentBranch = Auth.getBranchId();
 
         let sales = db.getCollection('sales');
-        if (!isAdmin) {
+
+        // Scope
+        if (currentBranch) {
+            sales = sales.filter(s => !s.branchId || s.branchId === currentBranch);
+        }
+
+        if (!isAdmin && !Auth.isSupervisor()) {
             sales = sales.filter(s => s.cashierId === userId);
         }
         sales = sales.slice(-5).reverse();
@@ -159,9 +184,16 @@ const Dashboard = {
     renderTopProducts() {
         const isAdmin = Auth.isAdmin();
         const userId = Auth.currentUser.id;
+        const currentBranch = Auth.getBranchId();
 
         let sales = db.getCollection('sales');
-        if (!isAdmin) {
+
+        // Scope
+        if (currentBranch) {
+            sales = sales.filter(s => !s.branchId || s.branchId === currentBranch);
+        }
+
+        if (!isAdmin && !Auth.isSupervisor()) {
             sales = sales.filter(s => s.cashierId === userId);
         }
 
@@ -243,9 +275,12 @@ const Dashboard = {
             nextDate.setDate(nextDate.getDate() + 1);
 
             const daySales = db.query('sales', s => {
+                // Branch Scope
+                if (Auth.getBranchId() && s.branchId !== Auth.getBranchId()) return false;
+
                 const d = new Date(s.createdAt);
                 if (d < date || d >= nextDate) return false;
-                if (!isAdmin && s.cashierId !== userId) return false;
+                if (!isAdmin && !Auth.isSupervisor() && s.cashierId !== userId) return false;
                 return true;
             });
             const total = daySales.reduce((sum, s) => sum + s.total, 0);
