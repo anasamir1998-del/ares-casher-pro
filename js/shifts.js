@@ -4,38 +4,53 @@
 
 const Shifts = {
     render() {
+        console.log('[Shifts] Render called');
         try {
             const content = document.getElementById('content-body');
-            if (!content) return;
+            if (!content) {
+                console.error('[Shifts] Content body not found');
+                return;
+            }
 
             let shifts = [];
             try {
                 shifts = db.getCollection('shifts') || [];
+                console.log(`[Shifts] Loaded ${shifts.length} shifts from DB`);
                 if (Array.isArray(shifts)) {
-                    shifts = [...shifts].reverse(); // Copy before reverse to avoid mutating original source if cached
+                    shifts = [...shifts].reverse();
                 } else {
+                    console.warn('[Shifts] Shifts is not an array, resetting to []');
                     shifts = [];
                 }
             } catch (e) {
-                console.error('[Shifts] Error loading shifts:', e);
+                console.error('[Shifts] Error loading shifts from DB:', e);
                 shifts = [];
             }
 
             const activeShiftId = App.activeShiftId;
+            console.log(`[Shifts] Active Shift ID: ${activeShiftId}`);
+
             let activeShift = null;
             if (activeShiftId) {
-                // validation
                 activeShift = shifts.find(s => s.id === activeShiftId);
-                // If active shift ID is in App but not in DB, clear it
                 if (!activeShift) {
                     console.warn('[Shifts] Active shift ID found but shift missing in DB. Clearing.');
                     App.activeShiftId = null;
-                    // Optional: db.setSetting/Localstorage update might be needed if App.activeShiftId is persisted manually elsewhere
-                    // But usually App.init loads it.
+                } else {
+                    console.log('[Shifts] Active shift found:', activeShift);
                 }
             }
 
-            content.innerHTML = `
+            // Emergency Reset Button (Temporary for debugging/recovery)
+            const debugControls = `
+                <div style="margin-bottom: 20px; text-align: right; opacity: 0.5; hover:opacity: 1;">
+                    <button class="btn btn-sm btn-ghost" onclick="Shifts.hardReset()" title="اضغط هنا لو الصفحة معلقة">
+                        🛠️ إصلاح
+                    </button>
+                </div>
+            `;
+
+            content.innerHTML = debugControls + `
                 <div class="stagger-in">
                     <!-- Active Shift Status -->
                     <div class="glass-card p-24 mb-24" style="background: ${activeShift ? 'linear-gradient(135deg, rgba(0,214,143,0.1), rgba(0,214,143,0.03))' : 'linear-gradient(135deg, rgba(255,77,106,0.1), rgba(255,77,106,0.03))'}; border-color: ${activeShift ? 'rgba(0,214,143,0.2)' : 'rgba(255,77,106,0.2)'};">
@@ -343,5 +358,13 @@ const Shifts = {
             </html>
         `);
         printWindow.document.close();
+    },
+
+    hardReset() {
+        if (confirm('هل أنت متأكد؟ سيتم إعادة تعيين حالة الورديات (لن يتم حذف السجل القديم).')) {
+            App.activeShiftId = null;
+            this.render();
+            Toast.show('success', 'تم إعادة التعيين', 'success');
+        }
     }
 };
