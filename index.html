@@ -1,12 +1,12 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARES Casher Pro â€” ظ†ط¸ط§ظ… ظƒط§ط´ظٹط± ط§ط­طھط±ط§ظپظٹ</title>
+    <title>ARES Casher Pro — نظام كاشير احترافي</title>
     <meta name="description"
-        content="ظ†ط¸ط§ظ… ظ†ظ‚ط§ط· ط§ظ„ط¨ظٹط¹ ط§ظ„ط§ط­طھط±ط§ظپظٹ ظ…ط¹ ط¯ط¹ظ… ط¶ط±ظٹط¨ط© ط§ظ„ظ‚ظٹظ…ط© ط§ظ„ظ…ط¶ط§ظپط© ط§ظ„ظ…طھظˆط§ظپظ‚ ظ…ط¹ ظ…طھط·ظ„ط¨ط§طھ ZATCA ظپظٹ ط§ظ„ظ…ظ…ظ„ظƒط© ط§ظ„ط¹ط±ط¨ظٹط© ط§ظ„ط³ط¹ظˆط¯ظٹط©">
+        content="نظام نقاط البيع الاحترافي مع دعم ضريبة القيمة المضافة المتوافق مع متطلبات ZATCA في المملكة العربية السعودية">
 
     <!-- Fonts -->
     <link
@@ -36,26 +36,26 @@
 
 <body>
 
-    <!-- â•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گ -->
+    <!-- ═══════════════════════════════════════════════════ -->
     <!-- LOGIN OVERLAY                                       -->
-    <!-- â•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گ -->
+    <!-- ═══════════════════════════════════════════════════ -->
     <div class="login-overlay" id="login-overlay">
         <div class="login-card">
             <div class="login-logo" id="login-logo">A</div>
             <h1 class="text-gradient" id="brand-name-login">ARES Casher Pro</h1>
-            <p id="login-subtitle">ظ†ط¸ط§ظ… ظƒط§ط´ظٹط± ط§ط­طھط±ط§ظپظٹ â€” ط³ط¬ظ‘ظ„ ط§ظ„ط¯ط®ظˆظ„ ظ„ظ„ظ…طھط§ط¨ط¹ط©</p>
+            <p id="login-subtitle">نظام كاشير احترافي — سجّل الدخول للمتابعة</p>
 
             <div class="form-group">
                 <select class="form-control" id="login-username">
-                    <option value="" disabled selected>ط¬ط§ط±ظٹ طھط­ظ…ظٹظ„ ط§ظ„ظ…ط³طھط®ط¯ظ…ظٹظ†...</option>
+                    <option value="" disabled selected>جاري تحميل المستخدمين...</option>
                 </select>
             </div>
             <div class="form-group">
-                <input type="password" class="form-control" id="login-password" placeholder="ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط±"
+                <input type="password" class="form-control" id="login-password" placeholder="كلمة المرور"
                     autocomplete="current-password" onkeydown="if(event.key==='Enter') App.handleLogin();">
             </div>
             <button class="btn btn-primary btn-xl btn-block" onclick="App.handleLogin()" id="login-btn">
-                طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„
+                تسجيل الدخول
             </button>
             <p id="login-hint" data-i18n="login_hint"
                 style="margin-top: 20px; font-size: 13px; color: var(--text-accent); font-weight: 600;">
@@ -65,18 +65,18 @@
             <!-- Language Selector on Login -->
             <div style="margin-top: 16px; display: flex; gap: 8px; justify-content: center;">
                 <button class="btn btn-ghost btn-sm lang-btn" onclick="App.switchLanguage('ar')"
-                    style="font-size:13px; padding: 6px 12px;">ًں‡¸ًں‡¦ ط§ظ„ط¹ط±ط¨ظٹط©</button>
+                    style="font-size:13px; padding: 6px 12px;">🇸🇦 العربية</button>
                 <button class="btn btn-ghost btn-sm lang-btn" onclick="App.switchLanguage('en')"
-                    style="font-size:13px; padding: 6px 12px;">ًں‡¬ًں‡§ English</button>
+                    style="font-size:13px; padding: 6px 12px;">🇬🇧 English</button>
                 <button class="btn btn-ghost btn-sm lang-btn" onclick="App.switchLanguage('ur')"
-                    style="font-size:13px; padding: 6px 12px;">ًں‡µًں‡° ط§ط±ط¯ظˆ</button>
+                    style="font-size:13px; padding: 6px 12px;">🇵🇰 اردو</button>
             </div>
         </div>
     </div>
 
-    <!-- â•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گ -->
+    <!-- ═══════════════════════════════════════════════════ -->
     <!-- MAIN APPLICATION                                    -->
-    <!-- â•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گ -->
+    <!-- ═══════════════════════════════════════════════════ -->
     <div id="app" style="display: none;">
 
         <!-- Sidebar Overlay (click to close on mobile) -->
@@ -84,8 +84,8 @@
 
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
-            <div class="sidebar-toggle-pin" onclick="App.toggleSidebar()" title="ط·ظٹ/ظپط±ط¯ ط§ظ„ظ‚ط§ط¦ظ…ط© (F2)">
-                <i class="fas">â—€</i>
+            <div class="sidebar-toggle-pin" onclick="App.toggleSidebar()" title="طي/فرد القائمة (F2)">
+                <i class="fas">◀</i>
             </div>
             <div class="sidebar-header">
                 <div class="sidebar-logo" id="sidebar-logo">A</div>
@@ -96,54 +96,54 @@
             </div>
 
             <nav class="sidebar-nav">
-                <div class="nav-section-title" id="nav-main-label">ط§ظ„ط±ط¦ظٹط³ظٹط©</div>
+                <div class="nav-section-title" id="nav-main-label">الرئيسية</div>
                 <div class="nav-item active" data-screen="dashboard" onclick="App.navigate('dashboard')">
-                    <i>ًں“ٹ</i> <span class="nav-text" data-i18n="dashboard">ظ„ظˆط­ط© ط§ظ„طھط­ظƒظ…</span>
+                    <i>📊</i> <span class="nav-text" data-i18n="dashboard">لوحة التحكم</span>
                 </div>
                 <div class="nav-item" data-screen="pos" onclick="App.navigate('pos')">
-                    <i>ًں›’</i> <span class="nav-text" data-i18n="pos">ط´ط§ط´ط© ط§ظ„ط¨ظٹط¹</span>
+                    <i>🛒</i> <span class="nav-text" data-i18n="pos">شاشة البيع</span>
                 </div>
                 <div class="nav-item" data-screen="invoices" onclick="App.navigate('invoices')">
-                    <i>ًں§¾</i> <span class="nav-text" data-i18n="invoices">ط§ظ„ظپظˆط§طھظٹط±</span>
+                    <i>🧾</i> <span class="nav-text" data-i18n="invoices">الفواتير</span>
                 </div>
                 <div class="nav-item" data-screen="shifts" onclick="App.navigate('shifts')">
-                    <i>âڈ°</i> <span class="nav-text" data-i18n="shifts">ط§ظ„ظˆط±ط¯ظٹط§طھ</span>
+                    <i>⏰</i> <span class="nav-text" data-i18n="shifts">الورديات</span>
                 </div>
 
                 <div id="admin-nav">
-                    <div class="nav-section-title" id="nav-admin-label">ط§ظ„ط¥ط¯ط§ط±ط©</div>
+                    <div class="nav-section-title" id="nav-admin-label">الإدارة</div>
                     <div class="nav-item" data-screen="products" onclick="App.navigate('products')">
-                        <i>ًں“¦</i> <span class="nav-text" data-i18n="products">ط§ظ„ظ…ظ†طھط¬ط§طھ</span>
+                        <i>📦</i> <span class="nav-text" data-i18n="products">المنتجات</span>
                     </div>
                     <div class="nav-item" data-screen="purchases" onclick="App.navigate('purchases')">
-                        <i>ًںڑڑ</i> <span class="nav-text" data-i18n="purchases">ط§ظ„ظ…ط´طھط±ظٹط§طھ</span>
+                        <i>🚚</i> <span class="nav-text" data-i18n="purchases">المشتريات</span>
                     </div>
                     <div class="nav-item" data-screen="customers" onclick="App.navigate('customers')">
-                        <i>ًں‘¥</i> <span class="nav-text" data-i18n="customers">ط§ظ„ط¹ظ…ظ„ط§ط،</span>
+                        <i>👥</i> <span class="nav-text" data-i18n="customers">العملاء</span>
                     </div>
                     <div class="nav-item" data-screen="reports" onclick="App.navigate('reports')">
-                        <i>ًں“ˆ</i> <span class="nav-text" data-i18n="reports">ط§ظ„طھظ‚ط§ط±ظٹط±</span>
+                        <i>📈</i> <span class="nav-text" data-i18n="reports">التقارير</span>
                     </div>
                     <div class="nav-item" data-screen="settings" onclick="App.navigate('settings')">
-                        <i>âڑ™ï¸ڈ</i> <span class="nav-text" data-i18n="settings">ط§ظ„ط¥ط¹ط¯ط§ط¯ط§طھ</span>
+                        <i>⚙️</i> <span class="nav-text" data-i18n="settings">الإعدادات</span>
                     </div>
                 </div>
             </nav>
 
             <div class="sidebar-footer">
                 <div class="user-info">
-                    <div class="user-avatar" id="user-avatar">ظ…</div>
+                    <div class="user-avatar" id="user-avatar">م</div>
                     <div class="user-details" style="flex:1;">
-                        <h4 id="user-name">ط§ظ„ظ…ط³طھط®ط¯ظ…</h4>
-                        <span id="user-role">â€”</span>
+                        <h4 id="user-name">المستخدم</h4>
+                        <span id="user-role">—</span>
                     </div>
-                    <button class="btn btn-ghost btn-sm" onclick="Auth.logout()" id="logout-btn" title="طھط³ط¬ظٹظ„ ط§ظ„ط®ط±ظˆط¬"
-                        style="padding:6px; border:none;">ًںڑھ</button>
+                    <button class="btn btn-ghost btn-sm" onclick="Auth.logout()" id="logout-btn" title="تسجيل الخروج"
+                        style="padding:6px; border:none;">🚪</button>
                 </div>
             </div>
         </aside>
 
-        <!-- â•گâ•گâ•گâ•گâ•گâ•گâ•گ TOP BAR (hidden by default) â•گâ•گâ•گâ•گâ•گâ•گâ•گ -->
+        <!-- ═══════ TOP BAR (hidden by default) ═══════ -->
         <nav class="topbar" id="topbar">
             <div class="topbar-brand">
                 <div class="sidebar-logo" id="topbar-logo" style="width:32px; height:32px; font-size:14px;">A</div>
@@ -151,46 +151,46 @@
             </div>
             <div class="topbar-nav" id="topbar-nav">
                 <a class="topbar-link active" data-screen="dashboard" onclick="App.navigate('dashboard')">
-                    <i>ًں“ٹ</i> <span data-i18n="dashboard">ظ„ظˆط­ط© ط§ظ„طھط­ظƒظ…</span>
+                    <i>📊</i> <span data-i18n="dashboard">لوحة التحكم</span>
                 </a>
                 <a class="topbar-link" data-screen="pos" onclick="App.navigate('pos')">
-                    <i>ًں›’</i> <span data-i18n="pos">ط´ط§ط´ط© ط§ظ„ط¨ظٹط¹</span>
+                    <i>🛒</i> <span data-i18n="pos">شاشة البيع</span>
                 </a>
                 <a class="topbar-link" data-screen="invoices" onclick="App.navigate('invoices')">
-                    <i>ًں§¾</i> <span data-i18n="invoices">ط§ظ„ظپظˆط§طھظٹط±</span>
+                    <i>🧾</i> <span data-i18n="invoices">الفواتير</span>
                 </a>
                 <a class="topbar-link" data-screen="shifts" onclick="App.navigate('shifts')">
-                    <i>âڈ°</i> <span data-i18n="shifts">ط§ظ„ظˆط±ط¯ظٹط§طھ</span>
+                    <i>⏰</i> <span data-i18n="shifts">الورديات</span>
                 </a>
                 <a class="topbar-link" data-screen="products" onclick="App.navigate('products')">
-                    <i>ًں“¦</i> <span data-i18n="products">ط§ظ„ظ…ظ†طھط¬ط§طھ</span>
+                    <i>📦</i> <span data-i18n="products">المنتجات</span>
                 </a>
                 <a class="topbar-link" data-screen="purchases" onclick="App.navigate('purchases')">
-                    <i>ًںڑڑ</i> <span data-i18n="purchases">ط§ظ„ظ…ط´طھط±ظٹط§طھ</span>
+                    <i>🚚</i> <span data-i18n="purchases">المشتريات</span>
                 </a>
                 <a class="topbar-link" data-screen="customers" onclick="App.navigate('customers')">
-                    <i>ًں‘¥</i> <span data-i18n="customers">ط§ظ„ط¹ظ…ظ„ط§ط،</span>
+                    <i>👥</i> <span data-i18n="customers">العملاء</span>
                 </a>
                 <a class="topbar-link" data-screen="reports" onclick="App.navigate('reports')">
-                    <i>ًں“ˆ</i> <span data-i18n="reports">ط§ظ„طھظ‚ط§ط±ظٹط±</span>
+                    <i>📈</i> <span data-i18n="reports">التقارير</span>
                 </a>
                 <a class="topbar-link" data-screen="settings" onclick="App.navigate('settings')">
-                    <i>âڑ™ï¸ڈ</i> <span data-i18n="settings">ط§ظ„ط¥ط¹ط¯ط§ط¯ط§طھ</span>
+                    <i>⚙️</i> <span data-i18n="settings">الإعدادات</span>
                 </a>
             </div>
             <div class="topbar-actions">
-                <button class="nav-mode-toggle-btn" onclick="App.toggleNavMode()" title="طھط¨ط¯ظٹظ„ ط¥ظ„ظ‰ ط§ظ„ظ‚ط§ط¦ظ…ط© ط§ظ„ط¬ط§ظ†ط¨ظٹط©"
-                    id="nav-mode-btn-top">âک°</button>
-                <button class="theme-toggle" onclick="App.showLanguageSelector()" title="طھط؛ظٹظٹط± ط§ظ„ظ„ط؛ط©"
-                    style="font-size:14px;">ًںŒگ</button>
+                <button class="nav-mode-toggle-btn" onclick="App.toggleNavMode()" title="تبديل إلى القائمة الجانبية"
+                    id="nav-mode-btn-top">☰</button>
+                <button class="theme-toggle" onclick="App.showLanguageSelector()" title="تغيير اللغة"
+                    style="font-size:14px;">🌐</button>
                 <button class="theme-toggle" id="theme-toggle-btn-top" onclick="App.toggleTheme()"
-                    title="طھط¨ط¯ظٹظ„ ط§ظ„ظ…ط¸ظ‡ط±">âک€ï¸ڈ</button>
-                <button class="notification-bell" onclick="App.showNotifications()" title="ط§ظ„طھظ†ط¨ظٹظ‡ط§طھ"
+                    title="تبديل المظهر">☀️</button>
+                <button class="notification-bell" onclick="App.showNotifications()" title="التنبيهات"
                     style="width:36px;height:36px;font-size:16px;">
-                    ًں””<span class="badge-dot" id="notif-dot-top" style="display:none;"></span>
+                    🔔<span class="badge-dot" id="notif-dot-top" style="display:none;"></span>
                 </button>
                 <button class="btn btn-ghost btn-sm" onclick="Auth.logout()" id="logout-btn-top"
-                    title="طھط³ط¬ظٹظ„ ط§ظ„ط®ط±ظˆط¬">ًںڑھ</button>
+                    title="تسجيل الخروج">🚪</button>
             </div>
         </nav>
 
@@ -198,26 +198,26 @@
         <main class="main-content">
             <header class="content-header">
                 <div style="display:flex; align-items:center; gap:12px;">
-                    <button class="menu-toggle" onclick="App.toggleSidebar()">âک°</button>
-                    <h1 id="header-title">ًں“ٹ ظ„ظˆط­ط© ط§ظ„طھط­ظƒظ…</h1>
+                    <button class="menu-toggle" onclick="App.toggleSidebar()">☰</button>
+                    <h1 id="header-title">📊 لوحة التحكم</h1>
                     <span class="badge badge-success" style="font-size:10px;">v3.3 VAT Update</span>
                 </div>
                 <div class="header-actions">
                     <span style="font-size: 13px; color: var(--text-muted);" id="header-date"></span>
                     <!-- Nav Mode Toggle -->
-                    <button class="nav-mode-toggle-btn" onclick="App.toggleNavMode()" title="طھط¨ط¯ظٹظ„ ط¥ظ„ظ‰ ط§ظ„ط´ط±ظٹط· ط§ظ„ط¹ظ„ظˆظٹ"
-                        id="nav-mode-btn">â‰،</button>
+                    <button class="nav-mode-toggle-btn" onclick="App.toggleNavMode()" title="تبديل إلى الشريط العلوي"
+                        id="nav-mode-btn">≡</button>
                     <!-- Language Selector -->
-                    <button class="theme-toggle" onclick="App.showLanguageSelector()" title="طھط؛ظٹظٹط± ط§ظ„ظ„ط؛ط©"
-                        style="font-size: 16px;">ًںŒگ</button>
+                    <button class="theme-toggle" onclick="App.showLanguageSelector()" title="تغيير اللغة"
+                        style="font-size: 16px;">🌐</button>
                     <button class="theme-toggle" id="theme-toggle-btn" onclick="App.toggleTheme()"
-                        title="طھط¨ط¯ظٹظ„ ط§ظ„ظ…ط¸ظ‡ط±">âک€ï¸ڈ</button>
-                    <button class="notification-bell" onclick="App.showNotifications()" title="ط§ظ„طھظ†ط¨ظٹظ‡ط§طھ">
-                        ًں””
+                        title="تبديل المظهر">☀️</button>
+                    <button class="notification-bell" onclick="App.showNotifications()" title="التنبيهات">
+                        🔔
                         <span class="badge-dot" id="notif-dot" style="display:none;"></span>
                     </button>
                     <button class="btn btn-ghost btn-sm" onclick="App.showKeyboardShortcuts()"
-                        title="ط§ط®طھطµط§ط±ط§طھ ظ„ظˆط­ط© ط§ظ„ظ…ظپط§طھظٹط­" style="font-size:16px; padding:10px;">âŒ¨ï¸ڈ</button>
+                        title="اختصارات لوحة المفاتيح" style="font-size:16px; padding:10px;">⌨️</button>
                     <div style="width:8px; height:8px; border-radius:50%; background:var(--success);"></div>
                 </div>
             </header>
@@ -228,28 +228,28 @@
 
     </div>
 
-    <!-- â•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گ -->
+    <!-- ═══════════════════════════════════════════════════ -->
     <!-- MODAL                                               -->
-    <!-- â•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گ -->
+    <!-- ═══════════════════════════════════════════════════ -->
     <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this) Modal.hide();">
         <div class="modal">
             <div class="modal-header">
-                <h2 id="modal-title">ط¹ظ†ظˆط§ظ†</h2>
-                <button class="modal-close" onclick="Modal.hide()">âœ•</button>
+                <h2 id="modal-title">عنوان</h2>
+                <button class="modal-close" onclick="Modal.hide()">✕</button>
             </div>
             <div class="modal-body" id="modal-body"></div>
             <div class="modal-footer" id="modal-footer"></div>
         </div>
     </div>
 
-    <!-- â•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گ -->
+    <!-- ═══════════════════════════════════════════════════ -->
     <!-- TOAST NOTIFICATIONS                                -->
-    <!-- â•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گ -->
+    <!-- ═══════════════════════════════════════════════════ -->
     <div class="toast-container" id="toast-container"></div>
 
-    <!-- â•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گ -->
+    <!-- ═══════════════════════════════════════════════════ -->
     <!-- SCRIPTS                                             -->
-    <!-- â•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گ -->
+    <!-- ═══════════════════════════════════════════════════ -->
 
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
