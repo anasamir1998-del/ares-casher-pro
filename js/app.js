@@ -366,7 +366,7 @@ const App = {
 
     checkNotifications() {
         const products = db.getCollection('products');
-        const lowStock = products.filter(p => p.stock !== undefined && p.stock <= (p.minStock || 5));
+        const lowStock = products.filter(p => p.type !== 'service' && p.stock !== undefined && p.stock <= (p.minStock || 5));
         const bellDot = document.getElementById('notif-dot');
         if (bellDot) {
             bellDot.style.display = lowStock.length > 0 ? 'block' : 'none';
@@ -375,7 +375,7 @@ const App = {
 
     showNotifications() {
         const products = db.getCollection('products');
-        const lowStock = products.filter(p => p.stock !== undefined && p.stock <= (p.minStock || 5));
+        const lowStock = products.filter(p => p.type !== 'service' && p.stock !== undefined && p.stock <= (p.minStock || 5));
 
         if (lowStock.length === 0) {
             Toast.show(t('notifications'), `${t('no_alerts')} ✨`, 'info');
