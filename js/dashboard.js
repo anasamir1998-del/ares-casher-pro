@@ -25,7 +25,7 @@ const Dashboard = {
         // Admin-only data
         const productsCount = db.count('products');
         const customersCount = db.count('customers');
-        const lowStock = db.query('products', p => p.stock !== undefined && p.stock <= 10);
+        const lowStock = db.query('products', p => p.type !== 'service' && p.stock !== undefined && p.stock <= 10);
 
         // Role label
         const scopeLabel = isAdmin ? t('all_sales') : t('your_sales');
