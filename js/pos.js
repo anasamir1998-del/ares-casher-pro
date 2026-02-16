@@ -448,9 +448,8 @@ const POS = {
                 <input type="number" class="form-control" id="cash-amount" value="${total.toFixed(2)}" step="0.01" oninput="POS.updateChange()">
                 <div id="change-display" style="margin-top:8px; font-weight:600; color: var(--success);"></div>
             </div>
-            <div class="form-group" style="display:flex; align-items:center; gap:8px;">
-                <input type="checkbox" id="vat-toggle" ${this.vatEnabled ? 'checked' : ''} onchange="POS.toggleVAT(this.checked)" style="width:20px; height:20px;">
-                <label for="vat-toggle" style="margin:0; cursor:pointer;">${t('apply_vat') || 'تطبيق الضريبة'}</label>
+            <div class="form-group" style="display:none;">
+                <input type="checkbox" id="vat-toggle" checked style="display:none;">
             </div>
         `, `
             <button class="btn btn-success btn-lg" onclick="POS.completeSale()">✅ ${t('complete_sale')}</button>
