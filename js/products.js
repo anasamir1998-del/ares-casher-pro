@@ -213,6 +213,10 @@ const Products = {
                         <div class="form-group">
                             <label>${t('unit_price')} (${t('sar')}) *</label>
                             <input type="number" class="form-control" id="p-price" value="${product?.price || ''}" min="0" step="0.01" style="direction:ltr;">
+                            <label class="flex items-center gap-8 mt-8" style="cursor:pointer; user-select:none; font-size:12px;">
+                                <input type="checkbox" id="p-tax-included" ${product?.taxIncluded ? 'checked' : ''} style="width:16px; height:16px;">
+                                <span>${t('price_includes_tax') || 'السعر شامل الضريبة'}</span>
+                            </label>
                         </div>
                         <div class="form-group">
                             <label>${t('category')}</label>
@@ -391,6 +395,7 @@ const Products = {
         const active = document.getElementById('p-active').value === 'true';
         const showInPos = document.getElementById('p-show-pos').checked;
         const notes = document.getElementById('p-notes').value.trim();
+        const taxIncluded = document.getElementById('p-tax-included').checked;
         const branchId = document.getElementById('p-branch') ? document.getElementById('p-branch').value : (Auth.getBranchId() || null);
 
         if (!name || isNaN(price) || price < 0) {
@@ -403,7 +408,7 @@ const Products = {
             price, categoryId: categoryId || null, type,
             stock: type === 'service' ? 0 : stock,
             minStock: type === 'service' ? 0 : minStock,
-            barcode, active, showInPos, notes,
+            barcode, active, showInPos, notes, taxIncluded,
             image: this.selectedImage || null,
             emoji: this.selectedEmoji || null,
             branchId: branchId // Persist Branch ID

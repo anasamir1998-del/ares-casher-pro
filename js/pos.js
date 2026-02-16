@@ -159,11 +159,37 @@ const POS = {
     },
 
     renderSummary() {
-        const subtotal = this.getSubtotal();
-        const discount = this.getDiscountAmount(subtotal);
-        const afterDiscount = subtotal - discount;
         const vatRate = this.vatEnabled ? parseFloat(db.getSetting('vat_rate', '15')) / 100 : 0;
-        const vatAmount = afterDiscount * vatRate;
+
+        let subtotal = 0;
+        let vatAmount = 0;
+
+        this.cart.forEach(item => {
+            let itemTotal = item.price * item.qty;
+            if (item.taxIncluded) {
+                // If price includes tax, we need to extract the base price
+                const basePrice = itemTotal / (1 + vatRate);
+                const itemVat = itemTotal - basePrice;
+                subtotal += basePrice;
+                vatAmount += itemVat;
+            } else {
+                // Price is exclusive of tax
+                subtotal += itemTotal;
+                vatAmount += itemTotal * vatRate;
+            }
+        });
+
+        // Apply Discount (on subtotal)
+        const discountAmount = this.getDiscountAmount(subtotal);
+        const afterDiscount = subtotal - discountAmount;
+
+        // Re-calculate VAT on discounted amount (Approximation: Pro-rating VAT reduction)
+        // If discount is applied, VAT should be reduced proportionally
+        if (discountAmount > 0) {
+            const discountRatio = afterDiscount / subtotal;
+            vatAmount = vatAmount * discountRatio;
+        }
+
         const total = afterDiscount + vatAmount;
 
         return `
@@ -171,10 +197,10 @@ const POS = {
                 <span>${t('subtotal')}</span>
                 <span class="amount">${Utils.formatSAR(subtotal)}</span>
             </div>
-            ${discount > 0 ? `
+                ${discountAmount > 0 ? `
             <div class="cart-summary-row" style="color: var(--success);">
                 <span>${t('discount')} ${this.discountType === 'percent' ? `(${this.discountValue}%)` : ''}</span>
-                <span class="amount">- ${Utils.formatSAR(discount)}</span>
+                <span class="amount">- ${Utils.formatSAR(discountAmount)}</span>
             </div>
             ` : ''}
             <div class="cart-summary-row" style="${!this.vatEnabled ? 'text-decoration: line-through; opacity: 0.5;' : ''}">
@@ -223,7 +249,8 @@ const POS = {
                 name: Utils.getName(product),
                 price: product.price,
                 cost: product.cost || 0,
-                qty: 1
+                qty: 1,
+                taxIncluded: product.taxIncluded || false
             });
         }
         App.playSound('click');
