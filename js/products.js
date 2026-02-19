@@ -7,9 +7,9 @@ const Products = {
     selectedEmoji: null,
 
     /* Auto-generate a 13-digit EAN-like barcode */
-    generateBarcode() {
+    generateBarcode(offset = 0) {
         const prefix = '200'; // Internal-use prefix
-        const timestamp = Date.now().toString().slice(-9); // Last 9 digits of timestamp
+        const timestamp = (Date.now() + offset).toString().slice(-9); // Last 9 digits
         const raw = prefix + timestamp; // 12 digits
         // EAN-13 check digit
         let sum = 0;
@@ -18,6 +18,18 @@ const Products = {
         }
         const checkDigit = (10 - (sum % 10)) % 10;
         return raw + checkDigit;
+    },
+
+    /* One-time migration: regenerate barcodes for all old products */
+    migrateOldBarcodes() {
+        if (localStorage.getItem('barcodes_migrated')) return;
+        const products = db.getCollection('products');
+        products.forEach((p, i) => {
+            if (!p.barcode || !p.barcode.startsWith('200')) {
+                db.update('products', p.id, { barcode: this.generateBarcode(i) });
+            }
+        });
+        localStorage.setItem('barcodes_migrated', '1');
     },
 
     /* Common product emojis */
@@ -33,6 +45,7 @@ const Products = {
     ],
 
     render() {
+        this.migrateOldBarcodes();
         const content = document.getElementById('content-body');
         const allProducts = db.getCollection('products');
         const categories = db.getCollection('categories');
