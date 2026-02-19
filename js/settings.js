@@ -671,7 +671,7 @@ const Settings = {
         const isEdit = !!user;
         const branches = (db.getCollection('branches') || []).filter(b => b.active !== false);
         Modal.show(isEdit ? `✏️ ${t('edit_user')} ` : `➕ ${t('add_user')} `, `
-    < div class="form-group" >
+            <div class="form-group">
                 <label>${t('full_name')}</label>
                 <input type="text" class="form-control" id="u-name" value="${user ? Utils.escapeHTML(user.name) : ''}">
             </div>
@@ -707,7 +707,7 @@ const Settings = {
                 <p style="font-size:11px; color:var(--text-muted); margin-top:4px;">🏢 ${t('branch_hint') || 'اختر الفرع الذي يعمل به هذا المستخدم. المدير يمكنه رؤية الكل.'}</p>
             </div>
 `, `
-    < button class="btn btn-primary" onclick = "Settings.saveUser(${isEdit ? `'${user.id}'` : 'null'})" > ${isEdit ? t('save_changes') : t('add')}</button >
+        <button class="btn btn-primary" onclick="Settings.saveUser(${isEdit ? `'${user.id}'` : 'null'})">${isEdit ? t('save_changes') : t('add')}</button>
         <button class="btn btn-ghost" onclick="Modal.hide()">${t('cancel')}</button>
 `);
     },
