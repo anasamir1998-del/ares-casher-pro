@@ -94,6 +94,12 @@ class Database {
                     // Conflict Resolution: Trust Cloud only if it's newer
                     if (idx > -1) {
                         const localItem = localData[idx];
+                        // If local has timestamp but cloud doesn't, local wins (cloud is stale)
+                        if (localItem.updatedAt && !docData.updatedAt) {
+                            console.log(`[Sync] Ignoring cloud data without timestamp for ${docData.id}`);
+                            return;
+                        }
+                        // If both have timestamps, newer wins
                         if (localItem.updatedAt && docData.updatedAt) {
                             const localTime = new Date(localItem.updatedAt).getTime();
                             const cloudTime = new Date(docData.updatedAt).getTime();

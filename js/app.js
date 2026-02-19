@@ -49,8 +49,12 @@ const App = {
         if (window.Settings && Settings.applyShopName) {
             Settings.applyShopName();
         }
-        // One small delay to catch late renders if necessary, but 500ms loop is overkill.
-        // Better to rely on specific events (like screen changes) which we already do.
+        // Re-apply after a delay to catch Firestore sync overwrites
+        setTimeout(() => {
+            if (window.Settings && Settings.applyShopName) {
+                Settings.applyShopName();
+            }
+        }, 2000);
     },
 
     /* ── Real-time Updates ── */
@@ -70,6 +74,13 @@ const App = {
                 Customers.render();
             } else if (this.currentScreen === 'invoices' && col === 'sales') {
                 Invoices.render();
+            }
+
+            // Re-apply branding when settings change from cloud
+            if (col === 'settings') {
+                if (window.Settings && Settings.applyShopName) {
+                    Settings.applyShopName();
+                }
             }
             // Toast.show('🔄', 'Data updated from cloud', 'info', 1000);
         });
