@@ -25,9 +25,10 @@ const Settings = {
     },
 
     applyShopName() {
-        const name = db.getSetting('company_name', 'Cashiery');
-        const nameEn = db.getSetting('company_name_en', 'Pro');
-        const logo = db.getSetting('company_logo', '');
+        // Read from direct localStorage first (bulletproof), fallback to db
+        const name = localStorage.getItem('cashiery_brand_name') || db.getSetting('company_name', 'Cashiery');
+        const nameEn = localStorage.getItem('cashiery_brand_name_en') || db.getSetting('company_name_en', 'Pro');
+        const logo = localStorage.getItem('cashiery_brand_logo') || db.getSetting('company_logo', '');
 
         console.log('[applyShopName] name:', name, '| nameEn:', nameEn, '| logo:', logo ? '(has logo)' : '(no logo)');
 
@@ -40,13 +41,6 @@ const Settings = {
         const sidebarSubtitle = document.getElementById('brand-subtitle-sidebar');
         const topbarBrand = document.getElementById('brand-name-topbar');
 
-        console.log('[applyShopName] Elements found:', {
-            loginBrand: !!loginBrand,
-            sidebarBrand: !!sidebarBrand,
-            sidebarSubtitle: !!sidebarSubtitle,
-            topbarBrand: !!topbarBrand
-        });
-
         if (loginBrand) loginBrand.textContent = name + ' ' + nameEn;
         if (sidebarBrand) sidebarBrand.textContent = name;
         if (sidebarSubtitle) sidebarSubtitle.textContent = nameEn;
@@ -56,12 +50,6 @@ const Settings = {
         const loginLogo = document.getElementById('login-logo');
         const sidebarLogo = document.getElementById('sidebar-logo');
         const topbarLogo = document.getElementById('topbar-logo');
-
-        console.log('[applyShopName] Logo elements found:', {
-            loginLogo: !!loginLogo,
-            sidebarLogo: !!sidebarLogo,
-            topbarLogo: !!topbarLogo
-        });
 
         const logos = [loginLogo, sidebarLogo, topbarLogo];
 
@@ -80,7 +68,7 @@ const Settings = {
             }
         });
 
-        console.log('[applyShopName] Done. Sidebar now shows:', sidebarBrand?.textContent, '| Topbar:', topbarBrand?.textContent);
+        console.log('[applyShopName] Done. Sidebar:', sidebarBrand?.textContent, '| Topbar:', topbarBrand?.textContent);
     },
 
     switchTab(btn, tab) {
@@ -414,6 +402,7 @@ const Settings = {
         const reader = new FileReader();
         reader.onload = (e) => {
             db.setSetting('company_logo', e.target.result);
+            localStorage.setItem('cashiery_brand_logo', e.target.result);
             Toast.show(t('success'), t('logo_uploaded'), 'success');
             // Re-render and apply branding
             document.getElementById('settings-content').innerHTML = this.renderCompanySettings();
@@ -424,14 +413,23 @@ const Settings = {
 
     removeLogo() {
         db.setSetting('company_logo', '');
+        localStorage.setItem('cashiery_brand_logo', '');
         Toast.show(t('success'), t('logo_removed'), 'info');
         document.getElementById('settings-content').innerHTML = this.renderCompanySettings();
         this.applyShopName();
     },
 
     saveCompany() {
-        db.setSetting('company_name', document.getElementById('s-company-name').value.trim());
-        db.setSetting('company_name_en', document.getElementById('s-company-name-en').value.trim());
+        const companyName = document.getElementById('s-company-name').value.trim();
+        const companyNameEn = document.getElementById('s-company-name-en').value.trim();
+
+        // Save to settings collection (for cloud sync)
+        db.setSetting('company_name', companyName);
+        db.setSetting('company_name_en', companyNameEn);
+
+        // Also save to direct localStorage (bulletproof persistence)
+        localStorage.setItem('cashiery_brand_name', companyName);
+        localStorage.setItem('cashiery_brand_name_en', companyNameEn);
 
         db.setSetting('vat_number', document.getElementById('s-vat-number').value.trim());
         db.setSetting('cr_number', document.getElementById('s-cr-number').value.trim());
