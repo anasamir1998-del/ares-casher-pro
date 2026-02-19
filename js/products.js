@@ -6,6 +6,20 @@ const Products = {
     selectedImage: null,
     selectedEmoji: null,
 
+    /* Auto-generate a 13-digit EAN-like barcode */
+    generateBarcode() {
+        const prefix = '200'; // Internal-use prefix
+        const timestamp = Date.now().toString().slice(-9); // Last 9 digits of timestamp
+        const raw = prefix + timestamp; // 12 digits
+        // EAN-13 check digit
+        let sum = 0;
+        for (let i = 0; i < 12; i++) {
+            sum += parseInt(raw[i]) * (i % 2 === 0 ? 1 : 3);
+        }
+        const checkDigit = (10 - (sum % 10)) % 10;
+        return raw + checkDigit;
+    },
+
     /* Common product emojis */
     productEmojis: [
         '🍔', '🍕', '🌮', '🌯', '🥪', '🥗', '🍱', '🍜', '🍛', '🍲',
@@ -248,8 +262,8 @@ const Products = {
             </div>
             <div class="grid-2">
                 <div class="form-group">
-                    <label>${t('barcode')}</label>
-                    <input type="text" class="form-control" id="p-barcode" value="${product?.barcode || ''}" style="direction:ltr;" placeholder="${t('optional')}">
+                    <label>${t('barcode')} 🔒</label>
+                    <input type="text" class="form-control" id="p-barcode" value="${product?.barcode || this.generateBarcode()}" style="direction:ltr; background:var(--bg-glass); opacity:0.8;" readonly>
                 </div>
                 <div class="form-group">
                     <label>${t('status')}</label>
@@ -416,7 +430,7 @@ const Products = {
             price, costPrice, categoryId: categoryId || null, type,
             stock: type === 'service' ? 0 : stock,
             minStock: type === 'service' ? 0 : minStock,
-            barcode, active, showInPos, notes, taxIncluded,
+            barcode: barcode || this.generateBarcode(), active, showInPos, notes, taxIncluded,
             image: this.selectedImage || null,
             emoji: this.selectedEmoji || null,
             branchId: branchId // Persist Branch ID
