@@ -448,22 +448,40 @@ const Dashboard = {
     },
 
     /* ── Branch Details Modal ── */
-    showBranchDetails(branchId) {
+    showBranchDetails(branchId, filterDate) {
         const branch = (db.getCollection('branches') || []).find(b => b.id === branchId);
         if (!branch) return;
 
         const allSales = db.getCollection('sales') || [];
         const allPurchases = db.getCollection('purchases') || [];
 
-        const branchSales = allSales.filter(s => s.branchId === branchId).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        const branchPurchases = allPurchases.filter(p => p.branchId === branchId).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        // Filter by branch
+        let branchSales = allSales.filter(s => s.branchId === branchId).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        let branchPurchases = allPurchases.filter(p => p.branchId === branchId).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        // Apply date filter if set
+        const dateValue = filterDate || '';
+        if (dateValue) {
+            const dayStart = new Date(dateValue);
+            dayStart.setHours(0, 0, 0, 0);
+            const dayEnd = new Date(dateValue);
+            dayEnd.setHours(23, 59, 59, 999);
+            branchSales = branchSales.filter(s => {
+                const d = new Date(s.createdAt);
+                return d >= dayStart && d <= dayEnd;
+            });
+            branchPurchases = branchPurchases.filter(p => {
+                const d = new Date(p.createdAt);
+                return d >= dayStart && d <= dayEnd;
+            });
+        }
 
         const totalSalesAmount = branchSales.reduce((sum, s) => sum + (s.total || 0), 0);
         const totalPurchasesAmount = branchPurchases.reduce((sum, p) => sum + (p.totalCost || p.total || 0), 0);
         const totalVAT = branchSales.reduce((sum, s) => sum + (s.vatAmount || 0), 0);
 
-        // Sales Table (last 20)
-        const salesRows = branchSales.slice(0, 20).map(s => `
+        // Sales Table (ALL records)
+        const salesRows = branchSales.map(s => `
             <tr>
                 <td style="font-family:Inter; font-weight:600;">${s.invoiceNumber || '—'}</td>
                 <td style="font-size:12px;">${Utils.formatDateTime(s.createdAt)}</td>
@@ -474,8 +492,8 @@ const Dashboard = {
             </tr>
         `).join('');
 
-        // Purchases Table (last 20)
-        const purchasesRows = branchPurchases.slice(0, 20).map(p => `
+        // Purchases Table (ALL records)
+        const purchasesRows = branchPurchases.map(p => `
             <tr>
                 <td style="font-family:Inter; font-weight:600;">${p.invoiceNumber || p.id?.slice(0, 8) || '—'}</td>
                 <td style="font-size:12px;">${Utils.formatDateTime(p.createdAt)}</td>
@@ -485,13 +503,26 @@ const Dashboard = {
             </tr>
         `).join('');
 
+        const todayStr = new Date().toISOString().split('T')[0];
+
         const html = `
             <div style="max-height:70vh; overflow-y:auto;">
+                <!-- Date Filter -->
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px; flex-wrap:wrap;">
+                    <label style="font-size:13px; font-weight:600;">📅 ${t('filter_by_date') || 'تصفية حسب التاريخ'}:</label>
+                    <input type="date" id="branch-date-filter" value="${dateValue}" max="${todayStr}"
+                           style="padding:8px 14px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--bg-glass); color:var(--text-primary); font-family:Inter; font-size:13px;"
+                           onchange="Dashboard.showBranchDetails('${branchId}', this.value)">
+                    ${dateValue ? `<button class="btn btn-ghost btn-sm" onclick="Dashboard.showBranchDetails('${branchId}')">✕ ${t('show_all') || 'عرض الكل'}</button>` : ''}
+                    <span style="font-size:12px; color:var(--text-muted); margin-inline-start:auto;">${dateValue ? '📌 ' + Utils.formatDate(new Date(dateValue)) : '📋 ' + (t('all_records') || 'كل السجلات')}</span>
+                </div>
+
                 <!-- Summary Stats -->
                 <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin-bottom:20px;">
                     <div style="background:var(--bg-glass); border-radius:var(--radius-sm); padding:14px; text-align:center;">
                         <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px;">💰 ${t('total_sales')}</div>
                         <div style="font-size:18px; font-weight:800; font-family:Inter; color:#667eea;">${Utils.formatCurrency(totalSalesAmount)}</div>
+                        <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${branchSales.length} ${t('invoice')}</div>
                     </div>
                     <div style="background:var(--bg-glass); border-radius:var(--radius-sm); padding:14px; text-align:center;">
                         <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px;">🏦 ${t('vat_collected')}</div>
@@ -500,6 +531,7 @@ const Dashboard = {
                     <div style="background:var(--bg-glass); border-radius:var(--radius-sm); padding:14px; text-align:center;">
                         <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px;">📦 ${t('purchases') || 'المشتريات'}</div>
                         <div style="font-size:18px; font-weight:800; font-family:Inter; color:#ff6b81;">${Utils.formatCurrency(totalPurchasesAmount)}</div>
+                        <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${branchPurchases.length} ${t('invoice')}</div>
                     </div>
                 </div>
 
@@ -521,7 +553,6 @@ const Dashboard = {
                         <tbody>${salesRows}</tbody>
                     </table>
                 </div>
-                ${branchSales.length > 20 ? '<p style="font-size:12px; color:var(--text-muted); text-align:center;">... ' + t('showing') + ' 20 ' + t('of') + ' ' + branchSales.length + '</p>' : ''}
                 ` : '<div class="empty-state" style="padding:20px;"><p style="color:var(--text-muted);">' + t('no_sales_yet') + '</p></div>'}
 
                 <!-- Purchases Table -->
@@ -541,7 +572,6 @@ const Dashboard = {
                         <tbody>${purchasesRows}</tbody>
                     </table>
                 </div>
-                ${branchPurchases.length > 20 ? '<p style="font-size:12px; color:var(--text-muted); text-align:center;">... ' + t('showing') + ' 20 ' + t('of') + ' ' + branchPurchases.length + '</p>' : ''}
                 ` : '<div class="empty-state" style="padding:20px;"><p style="color:var(--text-muted);">' + (t('no_purchases') || 'لا توجد مشتريات') + '</p></div>'}
             </div>
         `;

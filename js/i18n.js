@@ -623,6 +623,10 @@ const I18n = {
         branch_required: { ar: 'يرجى اختيار الفرع', en: 'Please select a branch', ur: 'براہ کرم برانچ منتخب کریں' },
         show_report: { ar: 'عرض التقرير', en: 'Show Report', ur: 'رپورٹ دکھائیں' },
         branch_activity: { ar: 'حركات الفروع', en: 'Branch Activity', ur: 'برانچ سرگرمی' },
+        filter_by_date: { ar: 'تصفية حسب التاريخ', en: 'Filter by Date', ur: 'تاریخ کے مطابق فلٹر' },
+        show_all: { ar: 'عرض الكل', en: 'Show All', ur: 'سب دکھائیں' },
+        all_records: { ar: 'كل السجلات', en: 'All Records', ur: 'تمام ریکارڈز' },
+        invoice: { ar: 'فاتورة', en: 'invoice(s)', ur: 'انوائس' },
 
         // ── Cloud Sync ─────────────────────────────────
         cloud_sync: { ar: 'المزامنة السحابية', en: 'Cloud Sync', ur: 'کلاؤڈ سنک' },
