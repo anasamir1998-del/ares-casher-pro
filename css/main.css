@@ -777,6 +777,18 @@ h6 {
     color: var(--text-muted);
 }
 
+/* -- Native Date Input RTL Fixes -- */
+input[type="date"] {
+    font-family: 'Inter', sans-serif;
+    direction: rtl; /* Container remains RTL for icon alignment */
+}
+
+input[type="date"]::-webkit-datetime-edit {
+    direction: ltr; /* Force the text inside to be LTR so YYYY-MM-DD doesn't break */
+    display: inline-flex;
+    justify-content: flex-end; /* Push text to the right side if needed */
+}
+
 select.form-control {
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%239ea4c1' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
