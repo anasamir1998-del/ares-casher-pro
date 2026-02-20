@@ -31,7 +31,7 @@ const Invoices = {
                 <!-- Search & Filter -->
                 <div class="flex gap-12 mb-20">
                     <input type="text" class="form-control" style="flex:1;" placeholder="🔍 ${t('search_invoice')}" oninput="Invoices.filter(this.value)" id="inv-search">
-                    <input type="text" class="form-control" style="width:180px; background-color:var(--element-bg); direction:rtl; text-align:right;" placeholder="📅 ${t('date')}" id="inv-date">
+                    <input type="date" class="form-control" style="width:180px; background-color:var(--element-bg);" id="inv-date" onchange="Invoices.filterByDate(this.value)">
                 </div>
 
                 <div class="glass-card" style="overflow:hidden;">
@@ -58,20 +58,58 @@ const Invoices = {
             </div>
         `;
 
-        // Initialize Flatpickr
-        setTimeout(() => {
-            if (typeof flatpickr !== 'undefined') {
-                flatpickr("#inv-date", {
-                    locale: I18n.currentLang === 'ar' ? 'ar' : 'default',
-                    dateFormat: "Y-m-d",
-                    theme: "dark",
-                    disableMobile: true,
-                    onChange: function (selectedDates, dateStr, instance) {
-                        Invoices.filterByDate(dateStr);
-                    }
-                });
-            }
-        }, 50);
+        // No external date picker needed — native type="date" is used
+    },
+
+    /* ── Text Search Filter ── */
+    filter(query) {
+        const tbody = document.getElementById('invoices-tbody');
+        if (!tbody) return;
+        const rows = tbody.querySelectorAll('tr');
+        const q = (query || '').toLowerCase();
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = q && !text.includes(q) ? 'none' : '';
+        });
+    },
+
+    /* ── Date Filter ── */
+    filterByDate(dateStr) {
+        const isAdmin = Auth.isAdmin();
+        const userId = Auth.currentUser.id;
+        const canViewAll = Auth.hasPermission('view_invoices');
+        const currentBranch = Auth.getBranchId();
+
+        let sales = db.getCollection('sales').reverse();
+
+        // Branch Scope
+        if (currentBranch) {
+            sales = sales.filter(s => !s.branchId || s.branchId === currentBranch);
+        }
+        if (!canViewAll) {
+            sales = sales.filter(s => s.cashierId === userId);
+        }
+
+        // Date filter
+        if (dateStr) {
+            const dayStart = new Date(dateStr);
+            dayStart.setHours(0, 0, 0, 0);
+            const dayEnd = new Date(dateStr);
+            dayEnd.setHours(23, 59, 59, 999);
+            sales = sales.filter(s => {
+                const d = new Date(s.createdAt);
+                return d >= dayStart && d <= dayEnd;
+            });
+        }
+
+        const tbody = document.getElementById('invoices-tbody');
+        if (tbody) {
+            tbody.innerHTML = this.renderRows(sales);
+        }
+
+        // Update count badge
+        const badge = document.querySelector('.badge.badge-accent');
+        if (badge) badge.textContent = sales.length + ' ' + t('invoice');
     },
 
     renderRows(sales) {
