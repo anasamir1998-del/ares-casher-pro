@@ -1421,7 +1421,12 @@ const Settings = {
         Toast.show('info', 'Clearing Transactions...', 'info');
         try {
             await db.clearCloudTransactions();
-            Toast.show('success', 'Transactions cleared successfully!', 'success');
+
+            // Clear Local Transactions immediately
+            ['sales', 'purchases', 'shifts'].forEach(c => localStorage.removeItem('ares_pos_' + c));
+
+            Toast.show('success', 'Transactions cleared successfully! Reloading...', 'success');
+            setTimeout(() => location.reload(), 1500);
         } catch (e) {
             console.error(e);
             Toast.show('error', 'Failed to clear transactions: ' + e.message, 'error');
