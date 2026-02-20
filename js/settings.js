@@ -777,32 +777,32 @@ const Settings = {
         });
 
         let html = `
-    < div class="mb-16" >
-        <strong>${Utils.escapeHTML(user.name)}</strong> —
-<span class="badge ${user.role === 'مدير' ? 'badge-accent' : user.role === 'مشرف' ? 'badge-warning' : 'badge-info'}">${t('role_' + (user.role === 'مدير' ? 'admin' : user.role === 'مشرف' ? 'supervisor' : 'cashier'))}</span>
-            </div >
-    `;
+            <div class="mb-16">
+                <strong>${Utils.escapeHTML(user.name)}</strong> —
+                <span class="badge ${user.role === 'مدير' ? 'badge-accent' : user.role === 'مشرف' ? 'badge-warning' : 'badge-info'}">${t('role_' + (user.role === 'مدير' ? 'admin' : user.role === 'مشرف' ? 'supervisor' : 'cashier'))}</span>
+            </div>
+        `;
 
         for (const [group, perms] of Object.entries(groups)) {
-            html += `< h4 style = "margin:16px 0 8px; font-size:14px; color:var(--text-muted);" > ${group}</h4 > `;
-            html += `< div class="permission-grid" > `;
+            html += `<h4 style="margin:16px 0 8px; font-size:14px; color:var(--text-muted);">${group}</h4>`;
+            html += `<div class="permission-grid">`;
             perms.forEach(p => {
                 const checked = effectivePerms.includes(p.key) ? 'checked' : '';
                 html += `
-    < div class="permission-item" >
-        <input type="checkbox" id="perm-${p.key}" data-perm="${p.key}" ${checked}>
-            <label for="perm-${p.key}">${p.label}</label>
-        </div>
-`;
+                    <div class="permission-item">
+                        <input type="checkbox" id="perm-${p.key}" data-perm="${p.key}" ${checked}>
+                        <label for="perm-${p.key}">${p.label}</label>
+                    </div>
+                `;
             });
-            html += `</div > `;
+            html += `</div>`;
         }
 
         Modal.show(`🔑 ${t('permissions')}: ${user.name} `, html, `
-    < button class="btn btn-primary" onclick = "Settings.savePermissions('${userId}')" >💾 ${t('save_permissions')}</button >
+            <button class="btn btn-primary" onclick="Settings.savePermissions('${userId}')">💾 ${t('save_permissions')}</button>
             <button class="btn btn-ghost" onclick="Settings.resetPermissions('${userId}')">🔄 ${t('reset_default')}</button>
             <button class="btn btn-ghost" onclick="Modal.hide()">${t('cancel')}</button>
-`, { wide: true });
+        `, { wide: true });
     },
 
     savePermissions(userId) {
