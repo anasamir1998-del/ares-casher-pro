@@ -392,7 +392,8 @@ const Dashboard = {
 
             // Today's sales for this branch
             const branchSalesToday = allSales.filter(s => {
-                if (s.branchId !== branch.id) return false;
+                const matchBranch = s.branchId === branch.id || (branch.isMain && !s.branchId);
+                if (!matchBranch) return false;
                 return new Date(s.createdAt) >= today;
             });
 
@@ -408,7 +409,7 @@ const Dashboard = {
             const topCashier = Object.entries(cashierTotals).sort((a, b) => b[1] - a[1])[0];
 
             // All-time sales for this branch (for comparison)
-            const branchSalesAll = allSales.filter(s => s.branchId === branch.id);
+            const branchSalesAll = allSales.filter(s => s.branchId === branch.id || (branch.isMain && !s.branchId));
             const totalAllTime = branchSalesAll.reduce((sum, s) => sum + (s.total || 0), 0);
 
             return `
@@ -440,7 +441,7 @@ const Dashboard = {
         return `
             <div class="glass-card p-20 mb-24">
                 <h3 style="margin-bottom:16px; font-size:16px;">🏢 ${t('branch_activity') || 'Branch Activity'}</h3>
-                <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:16px;">
+                <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:16px;">
                     ${cardsHtml}
                 </div>
             </div>
@@ -455,9 +456,9 @@ const Dashboard = {
         const allSales = db.getCollection('sales') || [];
         const allPurchases = db.getCollection('purchases') || [];
 
-        // Filter by branch
-        let branchSales = allSales.filter(s => s.branchId === branchId).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        let branchPurchases = allPurchases.filter(p => p.branchId === branchId).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        // Filter by branch (include sales with no branchId for main branch)
+        let branchSales = allSales.filter(s => s.branchId === branchId || (branch.isMain && !s.branchId)).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        let branchPurchases = allPurchases.filter(p => p.branchId === branchId || (branch.isMain && !p.branchId)).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
         // Apply date filter if set
         const dateValue = filterDate || '';
