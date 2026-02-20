@@ -511,9 +511,8 @@ const Dashboard = {
                 <!-- Date Filter -->
                 <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px; flex-wrap:wrap;">
                     <label style="font-size:13px; font-weight:600;">📅 ${t('filter_by_date') || 'تصفية حسب التاريخ'}:</label>
-                    <input type="date" id="branch-date-filter" value="${dateValue}" max="${todayStr}"
-                           style="padding:8px 14px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--bg-glass); color:var(--text-primary); font-family:Inter, sans-serif; font-size:13px;"
-                           onchange="Dashboard.showBranchDetails('${branchId}', this.value)">
+                    <input type="text" id="branch-date-filter" value="${dateValue}"
+                           style="padding:8px 14px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--bg-glass); color:var(--text-primary); font-family:Inter, sans-serif; font-size:13px; width:160px; direction:rtl; text-align:right;">
                     ${dateValue ? `<button class="btn btn-ghost btn-sm" onclick="Dashboard.showBranchDetails('${branchId}')">✕ ${t('show_all') || 'عرض الكل'}</button>` : ''}
                     <span style="font-size:12px; color:var(--text-muted); margin-inline-start:auto;">${dateValue ? '📌 ' + Utils.formatDate(new Date(dateValue)) : '📋 ' + (t('all_records') || 'كل السجلات')}</span>
                 </div>
@@ -580,5 +579,21 @@ const Dashboard = {
         Modal.show(`🏪 ${Utils.escapeHTML(branch.name)}`, html, `
             <button class="btn btn-ghost" onclick="Modal.hide()">${t('close') || 'إغلاق'}</button>
         `, { wide: true });
+
+        // Initialize Flatpickr for the modal date filter
+        setTimeout(() => {
+            if (typeof flatpickr !== 'undefined') {
+                flatpickr("#branch-date-filter", {
+                    locale: I18n.currentLang === 'ar' ? 'ar' : 'default',
+                    dateFormat: "Y-m-d",
+                    theme: "dark",
+                    disableMobile: true,
+                    maxDate: "today",
+                    onChange: function (selectedDates, dateStr, instance) {
+                        Dashboard.showBranchDetails(branchId, dateStr);
+                    }
+                });
+            }
+        }, 50);
     }
 };
