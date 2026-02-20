@@ -1290,6 +1290,12 @@ const Settings = {
                         <button class="btn btn-warning" onclick="Settings.forceCloudDownload()">📥 ${t('download_now') || 'Download Now'}</button>
                     </div>
                 </div>
+
+                <div class="glass-card p-20 mt-20" style="background: rgba(220, 53, 69, 0.1); border-color: var(--danger);">
+                    <h4 style="margin-bottom:8px; color: var(--danger);">⚠️ ${t('danger_zone') || 'Danger Zone'}</h4>
+                    <p style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">${t('clear_cloud_desc') || 'Delete ALL data from the cloud database. Attempt to fix sync issues.'}</p>
+                    <button class="btn btn-danger" onclick="Settings.clearCloudData()">🗑️ ${t('clear_cloud_data') || 'Reset Cloud Data'}</button>
+                </div>
             </div>
     `;
     },
@@ -1376,6 +1382,24 @@ const Settings = {
         } catch (e) {
             console.error(e);
             Toast.show('error', 'Download failed: ' + e.message, 'error');
+        }
+    },
+    async clearCloudData() {
+        Modal.show(t('warning'), t('confirm_clear_cloud') || 'Are you sure you want to delete ALL data from the cloud? This cannot be undone and will stop sync for other devices until re-uploaded.', `
+            <button class="btn btn-danger" onclick="Settings.performClearCloudData()">${t('yes_delete') || 'Yes, Delete All'}</button>
+            <button class="btn btn-ghost" onclick="Modal.hide()">${t('cancel')}</button>
+        `);
+    },
+
+    async performClearCloudData() {
+        Modal.hide();
+        Toast.show('info', 'Clearing Cloud Data...', 'info');
+        try {
+            await db.clearCloudData();
+            Toast.show('success', 'Cloud data cleared successfully!', 'success');
+        } catch (e) {
+            console.error(e);
+            Toast.show('error', 'Failed to clear cloud data: ' + e.message, 'error');
         }
     }
 };

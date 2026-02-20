@@ -622,6 +622,25 @@ const I18n = {
         all_branches: { ar: 'كل الفروع', en: 'All Branches', ur: 'تمام شاخیں' },
         branch_required: { ar: 'يرجى اختيار الفرع', en: 'Please select a branch', ur: 'براہ کرم برانچ منتخب کریں' },
         show_report: { ar: 'عرض التقرير', en: 'Show Report', ur: 'رپورٹ دکھائیں' },
+
+        // ── Cloud Sync ─────────────────────────────────
+        cloud_sync: { ar: 'المزامنة السحابية', en: 'Cloud Sync', ur: 'کلاؤڈ سنک' },
+        danger_zone: { ar: 'منطقة الخطر', en: 'Danger Zone', ur: 'خطرے کا علاقہ' },
+        clear_cloud_data: { ar: 'مسح البيانات السحابية', en: 'Clear Cloud Data', ur: 'کلاؤڈ ڈیٹا صاف کریں' },
+        clear_cloud_desc: { ar: 'حذف جميع البيانات من قاعدة البيانات السحابية. هذا الإجراء لا يمكن التراجع عنه.', en: 'Delete ALL data from the cloud database. Irreversible.', ur: 'کلاؤڈ ڈیٹا بیس سے تمام ڈیٹا حذف کریں۔ ناقابل واپسی۔' },
+        confirm_clear_cloud: { ar: 'هل أنت متأكد من حذف جميع البيانات السحابية؟ سيؤدي هذا إلى إيقاف المزامنة للأجهزة الأخرى حتى يتم رفع البيانات مرة أخرى.', en: 'Are you sure? This deletes ALL cloud data and stops sync for others.', ur: 'کیا آپ واقعی تمام کلاؤڈ ڈیٹا حذف کرنا چاہتے ہیں؟' },
+        yes_delete: { ar: 'نعم، احذف الكل', en: 'Yes, Delete All', ur: 'ہاں، سب حذف کریں' },
+        force_upload: { ar: 'رفع إجباري', en: 'Force Upload', ur: 'زبردستی اپ لوڈ' },
+        force_upload_desc: { ar: 'رفع البيانات المحلية للسحابة (يستبدل بيانات السحابة)', en: 'Upload local data to cloud (overwrites cloud)', ur: 'مقامی ڈیٹا کلاؤڈ پر اپ لوڈ کریں' },
+        force_download: { ar: 'تحميل إجباري', en: 'Force Download', ur: 'زبردستی ڈاؤن لوڈ' },
+        force_download_desc: { ar: 'تحميل البيانات من السحابة (يستبدل البيانات المحلية)', en: 'Download cloud data (overwrites local)', ur: 'کلاؤڈ سے ڈیٹا ڈاؤن لوڈ کریں' },
+        upload_now: { ar: 'رفع الآن', en: 'Upload Now', ur: 'ابھی اپ لوڈ کریں' },
+        download_now: { ar: 'تحميل الآن', en: 'Download Now', ur: 'ابھی ڈاؤن لوڈ کریں' },
+        connection_status: { ar: 'حالة الاتصال', en: 'Connection Status', ur: 'کنکشن کی حیثیت' },
+        check_connection_desc: { ar: 'اضغط للتحقق من الاتصال بقاعدة البيانات', en: 'Click to verify connection', ur: 'کنکشن چیک کرنے کے لیے کلک کریں' },
+        test_connection: { ar: 'اختبار الاتصال', en: 'Test Connection', ur: 'کنکشن ٹیسٹ' },
+        connection_success: { ar: 'تم الاتصال بنجاح', en: 'Connected successfully', ur: 'کامیابی سے منسلک' },
+        connection_failed: { ar: 'فشل الاتصال', en: 'Connection failed', ur: 'کنکشن ناکام' },
     },
 
     init() {

@@ -13,7 +13,7 @@ class Database {
             this.syncCollections = ['products', 'categories', 'customers', 'users', 'settings', 'shifts', 'purchases'];
 
             // Initial checks
-            // this.checkMigration(); // Disabled to prevent auto-reset loop
+            this.checkMigration();
             this.startListeners();
         }
     }
@@ -77,6 +77,24 @@ class Database {
 
             if (count > 0) await batch.commit();
             console.log(`Uploaded ${count} items to ${colName}`);
+        }
+    }
+
+    // Clear all data from Firestore (Dangerous!)
+    async clearCloudData() {
+        const collections = ['products', 'categories', 'customers', 'users', 'settings', 'shifts', 'purchases'];
+        for (const colName of collections) {
+            const snapshot = await window.dbFirestore.collection(colName).get();
+            const batch = window.dbFirestore.batch();
+            let count = 0;
+            snapshot.docs.forEach(doc => {
+                batch.delete(doc.ref);
+                count++;
+            });
+            if (count > 0) {
+                await batch.commit();
+                console.log(`Cleared ${count} items from ${colName}`);
+            }
         }
     }
 
