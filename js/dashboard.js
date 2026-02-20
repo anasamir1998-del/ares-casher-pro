@@ -86,6 +86,8 @@ const Dashboard = {
                     </div>`}
                 </div>
 
+                ${isAdmin ? this.renderBranchActivity() : ''}
+
                 <!-- Charts Row -->
                 <div class="grid-2 mb-24">
                     <div class="glass-card p-20">
@@ -369,6 +371,78 @@ const Dashboard = {
             <div class="empty-state" style="padding: 30px;">
                 <p style="color: var(--text-muted); margin-bottom:12px;">${t('no_open_shift')}</p>
                 <button class="btn btn-primary btn-sm" onclick="App.navigate('shifts')">⏰ ${t('open_new_shift')}</button>
+            </div>
+        `;
+    },
+
+    /* ── Branch Activity (Admin Only) ── */
+    renderBranchActivity() {
+        const branches = (db.getCollection('branches') || []).filter(b => b.active !== false);
+        if (branches.length <= 1) return ''; // No need if only 1 branch
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const allSales = db.getCollection('sales') || [];
+        const allUsers = db.getCollection('users') || [];
+
+        const colors = ['#667eea', '#00d68f', '#ffaa00', '#00b4d8', '#ff6b81', '#a855f7'];
+
+        let cardsHtml = branches.map((branch, idx) => {
+            const color = colors[idx % colors.length];
+
+            // Today's sales for this branch
+            const branchSalesToday = allSales.filter(s => {
+                if (s.branchId !== branch.id) return false;
+                return new Date(s.createdAt) >= today;
+            });
+
+            const revenue = branchSalesToday.reduce((sum, s) => sum + (s.total || 0), 0);
+            const count = branchSalesToday.length;
+
+            // Top cashier for this branch today
+            const cashierTotals = {};
+            branchSalesToday.forEach(s => {
+                const name = s.cashierName || t('unknown');
+                cashierTotals[name] = (cashierTotals[name] || 0) + (s.total || 0);
+            });
+            const topCashier = Object.entries(cashierTotals).sort((a, b) => b[1] - a[1])[0];
+
+            // All-time sales for this branch (for comparison)
+            const branchSalesAll = allSales.filter(s => s.branchId === branch.id);
+            const totalAllTime = branchSalesAll.reduce((sum, s) => sum + (s.total || 0), 0);
+
+            return `
+                <div class="glass-card p-20" style="border-right: 4px solid ${color}; min-width: 260px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                        <h4 style="font-size:15px; font-weight:700;">🏪 ${Utils.escapeHTML(branch.name)}</h4>
+                        ${branch.isMain ? '<span class="badge badge-accent" style="font-size:10px;">' + t('main') + '</span>' : ''}
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;">
+                        <div style="background:var(--bg-glass); border-radius:var(--radius-sm); padding:12px; text-align:center;">
+                            <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px;">💰 ${t('today_revenue')}</div>
+                            <div style="font-size:17px; font-weight:800; font-family:Inter; color:${color};">${Utils.formatCurrency(revenue)}</div>
+                        </div>
+                        <div style="background:var(--bg-glass); border-radius:var(--radius-sm); padding:12px; text-align:center;">
+                            <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px;">🧾 ${t('today_invoices')}</div>
+                            <div style="font-size:17px; font-weight:800; font-family:Inter;">${count}</div>
+                        </div>
+                    </div>
+
+                    <div style="font-size:12px; color:var(--text-muted); display:flex; justify-content:space-between;">
+                        <span>👤 ${topCashier ? Utils.escapeHTML(topCashier[0]) : '—'}</span>
+                        <span style="font-family:Inter;">${topCashier ? Utils.formatCurrency(topCashier[1]) : ''}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        return `
+            <div class="glass-card p-20 mb-24">
+                <h3 style="margin-bottom:16px; font-size:16px;">🏢 ${t('branch_activity') || 'Branch Activity'}</h3>
+                <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:16px;">
+                    ${cardsHtml}
+                </div>
             </div>
         `;
     }

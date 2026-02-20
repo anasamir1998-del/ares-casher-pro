@@ -622,6 +622,7 @@ const I18n = {
         all_branches: { ar: 'كل الفروع', en: 'All Branches', ur: 'تمام شاخیں' },
         branch_required: { ar: 'يرجى اختيار الفرع', en: 'Please select a branch', ur: 'براہ کرم برانچ منتخب کریں' },
         show_report: { ar: 'عرض التقرير', en: 'Show Report', ur: 'رپورٹ دکھائیں' },
+        branch_activity: { ar: 'حركات الفروع', en: 'Branch Activity', ur: 'برانچ سرگرمی' },
 
         // ── Cloud Sync ─────────────────────────────────
         cloud_sync: { ar: 'المزامنة السحابية', en: 'Cloud Sync', ur: 'کلاؤڈ سنک' },
