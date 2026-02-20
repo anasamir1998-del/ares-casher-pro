@@ -378,7 +378,7 @@ const Dashboard = {
     /* ── Branch Activity (Admin Only) ── */
     renderBranchActivity() {
         const branches = (db.getCollection('branches') || []).filter(b => b.active !== false);
-        if (branches.length <= 1) return ''; // No need if only 1 branch
+        if (branches.length === 0) return '';
 
         const today = new Date();
         today.setHours(0, 0, 0, 0);
