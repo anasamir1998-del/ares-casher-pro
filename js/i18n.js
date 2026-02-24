@@ -258,6 +258,7 @@ const I18n = {
         category_name: { ar: 'اسم التصنيف', en: 'Category Name', ur: 'زمرے کا نام' },
         no_category: { ar: 'بدون تصنيف', en: 'Uncategorized', ur: 'بغیر زمرہ' },
         price: { ar: 'السعر', en: 'Price', ur: 'قیمت' },
+        price_includes_tax: { ar: 'شامل الضريبة', en: 'Price Includes Tax', ur: 'قیمت میں ٹیکس شامل ہے' },
         stock: { ar: 'المخزون', en: 'Stock', ur: 'اسٹاک' },
         category: { ar: 'التصنيف', en: 'Category', ur: 'زمرہ' },
         name: { ar: 'الاسم', en: 'Name', ur: 'نام' },
