@@ -59,7 +59,8 @@ const Reports = {
                     --rp-border: rgba(255, 255, 255, 0.08);
                 }
 
-                .tabs-premium { display: flex; gap: 4px; background: rgba(30, 41, 59, 0.7); padding: 4px; border-radius: 14px; border: 1px solid var(--rp-border); backdrop-filter: blur(10px); }
+                .tabs-premium { display: flex; gap: 4px; background: rgba(30, 41, 59, 0.7); padding: 4px; border-radius: 14px; border: 1px solid var(--rp-border); backdrop-filter: blur(10px); overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; }
+                .tabs-premium::-webkit-scrollbar { display: none; }
                 .tab-p-btn { border: none; background: none; color: var(--rp-muted); padding: 10px 18px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.3s; font-size: 13px; white-space: nowrap; }
                 .tab-p-btn.active { background: var(--rp-accent); color: white; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
                 .tab-p-btn:hover:not(.active) { background: rgba(255,255,255,0.05); color: white; }
@@ -230,9 +231,12 @@ const Reports = {
                     <h4 class="mb-24 flex items-center gap-12">⚡ ${t('recent_transactions')}</h4>
                     <div style="max-height: 250px; overflow-y: auto;">
                         ${sales.slice(-5).reverse().map(s => `
-                            <div class="flex justify-between items-center p-14 mb-10 bg-black-20 rounded-16 border-glass hover-scale" style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05);">
-                                <div><div class="bold text-slate-200">${s.invoiceNumber}</div><div class="text-xs text-muted">${Utils.formatTime(s.createdAt)}</div></div>
-                                <div class="bold text-accent">${Utils.formatSAR(s.total)}</div>
+                            <div class="flex justify-between items-center p-10 mb-8 rounded-16 border-glass hover-scale" style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); font-size: 13px;">
+                                <div style="min-width: 0; flex: 1; margin-right: 8px;">
+                                    <div class="bold text-slate-200" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${s.invoiceNumber}">${s.invoiceNumber}</div>
+                                    <div class="text-xs text-muted">${Utils.formatTime(s.createdAt)}</div>
+                                </div>
+                                <div class="bold text-accent" style="white-space: nowrap;">${Utils.formatSAR(s.total)}</div>
                             </div>
                         `).join('') || '<p class="text-center text-muted p-20">No transactions in this period</p>'}
                     </div>

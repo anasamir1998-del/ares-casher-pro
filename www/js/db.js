@@ -5,28 +5,70 @@
 class Database {
     constructor() {
         this.prefix = 'ares_pos_';
-        
-        // Start Firestore Sync if available
-        if (window.dbFirestore) {
-            console.log("[DB] Starting Firestore Sync...");
-            this.syncCollections = ['products', 'categories', 'customers', 'users', 'settings', 'shifts', 'purchases', 'sales'];
+        this.isSyncStarted = false;
+        this.syncCollections = ['products', 'categories', 'customers', 'users', 'settings', 'shifts', 'purchases', 'sales'];
 
-            // Perform automatic initial sync
-            this.initialSync();
-            this.startListeners();
-        } else {
-            console.log("[DB] No Cloud Provider. Using Local Mode.");
-            this.initDefaults();
-        }
-
-        // ONE-TIME CLEANUP of legacy shadow storage (Branding)
-        // This ensures the new synced settings are prioritizied
+        // One-time cleanup of legacy shadow storage
         ['cashiery_brand_name', 'cashiery_brand_name_en', 'cashiery_brand_logo'].forEach(k => {
             if (localStorage.getItem(k)) {
-                console.log(`[DB] Cleaning up legacy key: ${k}`);
                 localStorage.removeItem(k);
             }
         });
+
+        // DEDUPLICATE Settings (Keep best version for every key)
+        const settings = this.getCollection('settings');
+        const bestSettings = {};
+        let deduped = false;
+        settings.forEach(s => {
+            const k = s.key || s.id;
+            if (!k) return;
+            if (!bestSettings[k]) {
+                bestSettings[k] = s;
+            } else {
+                deduped = true;
+                const existingTime = bestSettings[k].updatedAt ? new Date(bestSettings[k].updatedAt).getTime() : 0;
+                const newTime = s.updatedAt ? new Date(s.updatedAt).getTime() : 0;
+                if (newTime > existingTime) bestSettings[k] = s;
+            }
+        });
+        if (deduped) {
+            const clean = Object.values(bestSettings).map(s => {
+                s.id = s.id || s.key;
+                s.key = s.key || s.id;
+                return s;
+            });
+            this.setCollection('settings', clean, true);
+        }
+
+        this.initDefaults(); // Fallback to local defaults anyway
+    }
+
+    async initializeSync() {
+        if (this.isSyncStarted) return;
+        if (!window.dbFirestore || !Auth.currentUser) {
+            console.warn("[DB] Sync requirements not met.");
+            return;
+        }
+
+        console.log("[DB] Initializing Sync for:", Auth.currentUser.username);
+        this.isSyncStarted = true;
+
+        try {
+            // Check for initial sync
+            const settings = this.getCollection('settings');
+            const initialized = settings.find(s => s.key === '_initialized' || s.id === '_initialized');
+
+            if (!initialized) {
+                console.log("[DB] Fresh install, performing initial sync.");
+                await this.initialSync();
+            }
+
+            // Start listeners
+            this.startListeners();
+        } catch (e) {
+            console.error("[DB] Sync initialization failed:", e);
+            this.isSyncStarted = false;
+        }
     }
 
     // ─── FIRESTORE INTEGRATION ──────────────────────────────────
@@ -63,7 +105,9 @@ class Database {
             }
             
             // Final step: Ensure any local items missing from cloud are pushed (for offline catch-up)
-            this.syncLocalToCloud();
+            // DISABLED: This blindly overwrites cloud data with local data on every startup.
+            // We rely on startListeners and cloudSave during actual changes instead.
+            // this.syncLocalToCloud();
         } catch (e) {
             console.error("[DB] Initial sync failed:", e);
             this.initDefaults(); // Fallback to local defaults if cloud check fails
@@ -92,7 +136,11 @@ class Database {
         for (const col of collections) {
             try {
                 const snapshot = await window.dbFirestore.collection(col).get();
-                const data = snapshot.docs.map(doc => doc.data());
+                const data = snapshot.docs.map(doc => {
+                    const d = doc.data();
+                    d.id = d.id || doc.id; // Ensure ID exists from Firestore Metadata
+                    return d;
+                });
                 // Always set collection to match cloud (even if empty)
                 this.setCollection(col, data, true);
             } catch (e) {
@@ -164,41 +212,49 @@ class Database {
 
     // Listen for remote changes
     startListeners() {
+        console.log("[DB] V30 (Cloud Wins) Initialized");
         this.syncCollections.forEach(colName => {
             window.dbFirestore.collection(colName).onSnapshot(snapshot => {
                 let localData = this.getCollection(colName);
                 let changed = false;
 
                 snapshot.docChanges().forEach(change => {
+                    const docId = change.doc.id;
                     const docData = change.doc.data();
-                    const idx = localData.findIndex(item => item.id === docData.id);
+                    docData.id = docData.id || docId; // Ensure id is present in data object
+
+                    let idx = localData.findIndex(item => item.id === docId);
+
+                    // Fallback for settings without matching IDs (find by key)
+                    if (idx === -1 && colName === 'settings' && (docData.key || docId)) {
+                        const searchKey = docData.key || docId;
+                        idx = localData.findIndex(item => item.key === searchKey);
+                    }
 
                     // Conflict Resolution: Trust Cloud only if it's newer
                     if (idx > -1) {
                         const localItem = localData[idx];
-                        // If local has timestamp but cloud doesn't, local wins (cloud is stale)
-                        if (localItem.updatedAt && !docData.updatedAt) {
-                            console.log(`[Sync] Ignoring cloud data without timestamp for ${docData.id}`);
-                            return;
+                        
+                        // SPECIAL CASE: Settings ALWAYS trust cloud as master (one source of truth)
+                        // This fixes issues where local defaults or legacy data was blocking updates
+                        if (colName === 'settings') {
+                            // Proceed to update
                         }
-                        // If both have timestamps, newer wins
-                        if (localItem.updatedAt && docData.updatedAt) {
+                        // OTHER Collections: Trust Cloud only if it's newer
+                        else if (localItem.updatedAt && docData.updatedAt) {
                             const localTime = new Date(localItem.updatedAt).getTime();
                             const cloudTime = new Date(docData.updatedAt).getTime();
                             if (localTime >= cloudTime) {
-                                console.log(`[Sync] Ignoring older cloud update for ${docData.id}`);
-                                return; // Skip this change
+                                return; 
                             }
+                        }
+                        else if (localItem.updatedAt && !docData.updatedAt) {
+                            console.log(`[Sync] Ignoring cloud data without timestamp for ${docData.id}`);
+                            return;
                         }
                     }
 
-                    if (change.type === "added") {
-                        if (idx === -1) {
-                            localData.push(docData);
-                            changed = true;
-                        }
-                    }
-                    else if (change.type === "modified") {
+                    if (change.type === "added" || change.type === "modified") {
                         if (idx > -1) {
                             localData[idx] = docData;
                             changed = true;
@@ -333,22 +389,29 @@ class Database {
     // Get settings (key-value store)
     getSetting(key, defaultValue = null) {
         const settings = this.getCollection('settings');
-        const setting = settings.find(s => s.key === key);
-        return setting ? setting.value : defaultValue;
+        // Check everything: key, id, or any property matching the key
+        const setting = settings.find(s => s.key === key || s.id === key);
+        if (setting && setting.value !== undefined) return setting.value;
+        
+        // Final fallback: check direct properties if the setting was saved as { key: 'value' }
+        const legacy = settings.find(s => s[key] !== undefined);
+        return legacy ? legacy[key] : defaultValue;
     }
 
     // Set setting
-    setSetting(key, value) {
+    setSetting(key, value, timestamp = null) {
         let settings = this.getCollection('settings');
-        const index = settings.findIndex(s => s.key === key);
+        const index = settings.findIndex(s => s.key === key || s.id === key);
 
         let newItem;
+        const updatedAt = timestamp || Utils.isoDate();
+
         if (index >= 0) {
             settings[index].value = value;
-            settings[index].updatedAt = Utils.isoDate(); // Add Timestamp
+            settings[index].updatedAt = updatedAt;
             newItem = settings[index];
         } else {
-            newItem = { key, value, id: key, updatedAt: Utils.isoDate() }; // Add Timestamp
+            newItem = { key, value, id: key, updatedAt: updatedAt };
             settings.push(newItem);
         }
 
@@ -414,10 +477,10 @@ class Database {
         }
 
         const settings = this.getCollection('settings');
-        // Helper to set default if missing
+        // Helper to set default if missing (use old timestamp for defaults)
         const setDefault = (key, value) => {
-            if (!settings.find(s => s.key === key)) {
-                this.setSetting(key, value);
+            if (!settings.find(s => s.key === key || s.id === key)) {
+                this.setSetting(key, value, '2020-01-01T00:00:00.000Z');
             }
         };
 

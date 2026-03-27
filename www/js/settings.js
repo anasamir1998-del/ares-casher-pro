@@ -1285,6 +1285,16 @@ const Settings = {
                     </div>
                 </div>
 
+                <div class="glass-card p-20 mt-20" style="border-top: 4px solid var(--danger);">
+                    <h4 class="text-danger mb-8">🛠️ ${t('repair_sync') || 'إصلاح المزامنة'}</h4>
+                    <p style="font-size:13px; opacity:0.7; margin-bottom:12px;">
+                        ${t('repair_sync_desc') || 'إذا لاحظت نقصاً في البيانات أو عدم تطابق بين الويب والجوال، يمكنك تصفير الذاكرة المحلية وإعادة التحميل بالكامل من السحابة.'}
+                    </p>
+                    <button class="btn btn-block" style="background:var(--danger); color:white;" onclick="Settings.performRepairSync()">
+                        🚀 ${t('start_repair') || 'بدء عملية الإصلاح والتحميل'}
+                    </button>
+                </div>
+
                 <div class="glass-card p-20 mt-20" style="background: rgba(220, 53, 69, 0.1); border-color: var(--danger);">
                     <h4 style="margin-bottom:8px; color: var(--danger);">⚠️ ${t('danger_zone') || 'Danger Zone'}</h4>
                     
@@ -1298,6 +1308,35 @@ const Settings = {
                 </div>
             </div>
     `;
+    },
+
+    async performRepairSync() {
+        if (!confirm('سيتم مسح الذاكرة المحلية وإعادة تحميل البيانات من السحابة. هل أنت متأكد؟')) return;
+        
+        Modal.show('🔄 جاري الإصلاح', `
+            <div style="text-align:center; padding:20px;">
+                <div class="loader mb-16" style="margin:0 auto;"></div>
+                <p>جاري مسح البيانات المحلية وإعادة المزامنة بالكامل...</p>
+            </div>
+        `);
+
+        try {
+            // Wipe everything from localStorage (specific collections)
+            const collections = ['products', 'categories', 'customers', 'users', 'settings', 'shifts', 'purchases', 'sales', 'branches'];
+            collections.forEach(col => {
+                localStorage.removeItem(db.prefix + col);
+            });
+            localStorage.removeItem(db.prefix + 'initial_sync_done');
+
+            // Trigger full download
+            setTimeout(async () => {
+                await db.downloadAllFromCloud();
+            }, 1000);
+        } catch (e) {
+            console.error(e);
+            Toast.show('❌', 'فشل الإصلاح', 'error');
+            Modal.hide();
+        }
     },
 
     async checkCloudConnection() {
@@ -1344,7 +1383,7 @@ const Settings = {
         Modal.hide();
         Toast.show('info', 'Uploading...', 'info', 10000);
         try {
-            await db.checkMigration(); // This function already handles uploading everything
+            await db.uploadAllToCloud();
             Toast.show('success', 'Upload completed!', 'success');
         } catch (e) {
             console.error(e);
@@ -1363,22 +1402,7 @@ const Settings = {
         Modal.hide();
         Toast.show('info', 'Downloading...', 'info', 10000);
         try {
-            // Re-use restore logic but from cloud
-            const collections = ['products', 'categories', 'users', 'customers', 'sales', 'shifts', 'settings'];
-            const dbFirestore = window.dbFirestore;
-
-            if (!dbFirestore) throw new Error("Firestore not initialized");
-
-            for (const col of collections) {
-                const snapshot = await dbFirestore.collection(col).get();
-                const data = snapshot.docs.map(doc => doc.data());
-                if (data.length > 0) {
-                    db.setCollection(col, data);
-                }
-            }
-
-            Toast.show('success', 'Download completed! Reloading...', 'success');
-            setTimeout(() => location.reload(), 1500);
+            await db.downloadAllFromCloud();
         } catch (e) {
             console.error(e);
             Toast.show('error', 'Download failed: ' + e.message, 'error');

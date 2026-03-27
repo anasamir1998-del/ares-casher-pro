@@ -341,6 +341,11 @@ const App = {
 
         // Re-apply branding after login (ensures sidebar/topbar are updated)
         this.applyBranding();
+
+        // Start Cloud Sync
+        if (typeof db !== 'undefined' && db.initializeSync) {
+            db.initializeSync();
+        }
     },
 
     setupSidebar() {
