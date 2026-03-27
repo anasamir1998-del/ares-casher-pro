@@ -25,10 +25,10 @@ const Settings = {
     },
 
     applyShopName() {
-        // Read from direct localStorage first (bulletproof), fallback to db
-        const name = localStorage.getItem('cashiery_brand_name') || db.getSetting('company_name', 'Cashiery');
-        const nameEn = localStorage.getItem('cashiery_brand_name_en') || db.getSetting('company_name_en', 'Pro');
-        const logo = localStorage.getItem('cashiery_brand_logo') || db.getSetting('company_logo', '');
+        // Use db.getSetting exclusively (Cloud Synced)
+        const name = db.getSetting('company_name', 'Cashiery');
+        const nameEn = db.getSetting('company_name_en', 'Pro');
+        const logo = db.getSetting('company_logo', '');
 
         // TEMP DEBUG — remove after fix is confirmed
         console.log('[DEBUG applyShopName] name=' + name + ', nameEn=' + nameEn + ', logo=' + (logo ? 'YES' : 'NO'));
@@ -403,7 +403,6 @@ const Settings = {
         const reader = new FileReader();
         reader.onload = (e) => {
             db.setSetting('company_logo', e.target.result);
-            localStorage.setItem('cashiery_brand_logo', e.target.result);
             Toast.show(t('success'), t('logo_uploaded'), 'success');
             // Re-render and apply branding
             document.getElementById('settings-content').innerHTML = this.renderCompanySettings();
@@ -414,7 +413,6 @@ const Settings = {
 
     removeLogo() {
         db.setSetting('company_logo', '');
-        localStorage.setItem('cashiery_brand_logo', '');
         Toast.show(t('success'), t('logo_removed'), 'info');
         document.getElementById('settings-content').innerHTML = this.renderCompanySettings();
         this.applyShopName();
@@ -427,10 +425,6 @@ const Settings = {
         // Save to settings collection (for cloud sync)
         db.setSetting('company_name', companyName);
         db.setSetting('company_name_en', companyNameEn);
-
-        // Also save to direct localStorage (bulletproof persistence)
-        localStorage.setItem('cashiery_brand_name', companyName);
-        localStorage.setItem('cashiery_brand_name_en', companyNameEn);
 
         db.setSetting('vat_number', document.getElementById('s-vat-number').value.trim());
         db.setSetting('cr_number', document.getElementById('s-cr-number').value.trim());

@@ -18,6 +18,15 @@ class Database {
             console.log("[DB] No Cloud Provider. Using Local Mode.");
             this.initDefaults();
         }
+
+        // ONE-TIME CLEANUP of legacy shadow storage (Branding)
+        // This ensures the new synced settings are prioritizied
+        ['cashiery_brand_name', 'cashiery_brand_name_en', 'cashiery_brand_logo'].forEach(k => {
+            if (localStorage.getItem(k)) {
+                console.log(`[DB] Cleaning up legacy key: ${k}`);
+                localStorage.removeItem(k);
+            }
+        });
     }
 
     // ─── FIRESTORE INTEGRATION ──────────────────────────────────
