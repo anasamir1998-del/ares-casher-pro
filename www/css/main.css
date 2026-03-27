@@ -2331,7 +2331,20 @@ body.nav-topbar .content-body {
     }
 
     .data-table {
-        min-width: 600px;
+        min-width: 650px; /* Slightly wider to give columns breathing room */
+    }
+
+    .data-table th, 
+    .data-table td {
+        padding: 10px 8px !important;
+        font-size: 13px !important;
+        white-space: nowrap !important; /* PREVENT WRAPPING */
+    }
+
+    .data-table td:last-child {
+        display: flex; /* Action buttons in one line */
+        gap: 4px;
+        min-width: 150px;
     }
 
     /* Hide less critical columns on very small screens to save space */
@@ -2344,7 +2357,7 @@ body.nav-topbar .content-body {
         }
         
         .data-table {
-            min-width: 500px;
+            min-width: 550px;
         }
     }
 
