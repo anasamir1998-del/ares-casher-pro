@@ -1,5 +1,12 @@
 {
   "appId": "com.casherpro.app",
   "appName": "Casher Pro",
-  "webDir": "www"
+  "webDir": "www",
+  "plugins": {
+    "StatusBar": {
+      "style": "LIGHT",
+      "backgroundColor": "#0a0e27",
+      "overlaysWebView": true
+    }
+  }
 }

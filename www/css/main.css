@@ -160,10 +160,26 @@ body {
     padding-right: env(safe-area-inset-right, 0px);
     box-sizing: border-box;
     overflow-x: hidden;
+    margin: 0;
     /* Only hide horizontal scroll */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /* Disable Text Selection */
+}
+
+/* Prevent selection only where it helps (UI controls) */
+.no-select,
+.btn,
+.nav-item,
+.topbar-link,
+.category-chip,
+.tab-btn,
+.menu-toggle,
+.theme-toggle,
+.notification-bell,
+.nav-mode-toggle-btn,
+.sidebar-toggle-pin,
+.qty-btn,
+.modal-close {
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -206,6 +222,42 @@ body::before {
 }
 
 /* ── Typography ── */
+/* Fix: correct WebKit scrollbar selectors (keep legacy block above) */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(102, 126, 234, 0.3);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(102, 126, 234, 0.5);
+}
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(102, 126, 234, 0.3);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(102, 126, 234, 0.5);
+}
+
 h1,
 h2,
 h3,
@@ -229,8 +281,10 @@ h6 {
 #app {
     display: flex;
     height: calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    width: 100vw;
     position: relative;
     z-index: 1;
+    overflow: hidden;
 }
 
 /* ── Sidebar ── */
@@ -245,6 +299,9 @@ h6 {
     position: relative;
     z-index: 100;
     backdrop-filter: blur(20px);
+    /* iOS Safe Area Padding */
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 /* Collapsed Sidebar */
@@ -431,9 +488,9 @@ h6 {
 }
 
 .content-header {
-    height: var(--header-height);
+    height: auto;
     min-height: var(--header-height);
-    padding: 0 28px;
+    padding: env(safe-area-inset-top, 0px) 28px 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -2265,11 +2322,11 @@ body.nav-topbar .content-body {
     }
 
     .sidebar-header {
-        padding-top: 45px;
+        padding-top: calc(env(safe-area-inset-top, 0px) + 20px);
     }
 
     .content-header {
-        padding: 35px 12px 8px 12px;
+        padding: calc(env(safe-area-inset-top, 0px) + 12px) 12px 12px 12px;
         min-height: auto;
         height: auto;
         background: var(--bg-primary);
@@ -2542,10 +2599,6 @@ body.nav-topbar .content-body {
 
 .hidden-element {
     display: none !important;
-}
-
-.w-full {
-    width: 100%;
 }
 
 .h-full {

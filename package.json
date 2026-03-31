@@ -4,16 +4,25 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "cap:sync": "npx cap sync",
+    "cap:copy": "npx cap copy",
+    "cap:doctor": "npx cap doctor",
+    "open:android": "npx cap open android",
+    "open:ios": "npx cap open ios"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
+  "engines": {
+    "node": ">=22"
+  },
   "dependencies": {
     "@capacitor/android": "^8.3.0",
     "@capacitor/cli": "^8.3.0",
     "@capacitor/core": "^8.3.0",
-    "@capacitor/ios": "^8.3.0"
+    "@capacitor/ios": "^8.3.0",
+    "@capacitor/status-bar": "^8.0.2"
   }
 }
